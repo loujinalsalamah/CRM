@@ -1,0 +1,56 @@
+search:
+1-Full Text Search                  \ok/
+2-Autocomplete / Suggestions   (prefix,substring,fuzzy search)     \ok , fuzzy/
+3-Advanced Search
+4-Semantic Search
+5-Geo Search                             \ok/
+6-Smart Ranking                          \ok/
+7-Search Recommendations
+8-Spell Correction
+9-Intent Detection
+
+ASync await promis/data
+App error
+
+now exist "Structured Filtering"
+
+
+
+requests for sell(id,clientId, propertyId)
+- post api/v1/requests
+- get api/v1/requests
+- get api/v1/requests/:id
+-
+
+requests for buy(id,clientId,propertyId)
+- post api/v1/requests
+- delete api/v1/requests
+- get api/v1/requests
+- get api/v1/requests/:id
+-
+
+properties(id,requestSellId)
+- get api/v1/properties
+- get api/v1/properties/:id
+- post api/v1/properties
+- patch api/v1/properties/:id
+- delete api/v1/properties/:id 
+- 
+-PATCH /properties/:id/status
+-GET /properties/nearby
+
+
+deals (id,(requestBuyId / requestSellId) ,employeeId)
+- post api/v1/deals
+- get api/v1/deals
+- get api/v1/deals/:id
+- patch api/v1/deals/:id
+- get api/v1/deals/:id/schedules
+- 
+-PATCH /deals/:id/reassign
+-GET /deals/:id/assignment-history
+-PATCH /deals/:id/stage
+-PATCH /deals/:id/status
+-PATCH /deals/:id/notes
+-PATCH /deals/:id/last-contact
+-GET /deals/:id/timeline

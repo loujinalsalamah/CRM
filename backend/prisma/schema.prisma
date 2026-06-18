@@ -12,3 +12,402 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model VisitorSession {
+  id            String         @id @default(uuid())
+  createdAt     DateTime       @default(now()) @map("created_at")
+  lastActiveAt  DateTime       @updatedAt @map("last_active_at")
+  deviceInfo    String?        @map("device_info")
+  ip            String?
+  clients       Client[]
+  notifications Notification[]
+
+  @@map("visitor_sessions")
+}
+
+model User {
+  id                        String         @id @default(uuid())
+  email                     String         @unique
+  password                  String?
+  isActive                  Boolean        @default(true) @map("is_active")
+  role                      UserRole       @default(CLIENT)
+  createdAt                 DateTime       @default(now()) @map("created_at")
+  updatedAt                 DateTime       @updatedAt @map("updated_at")
+  passwordChangedAt         DateTime?      @map("password_changed_at")
+  passwordResetOtp          String?        @map("password_reset_otp")
+  passwordResetExpires      DateTime?      @map("password_reset_expires")
+  passwordResetToken        String?        @map("password_reset_token")
+  passwordResetTokenExpires DateTime?      @map("password_reset_token_expires")
+  otp                       String?
+  otpExpires                DateTime?      @map("otp_expires")
+  otpVerified               Boolean        @default(false) @map("otp_verified")
+  signupMethod              SignupMethod   @default(EMAIL) @map("signup_method")
+  googleId                  String?        @unique @map("google_id")
+  employee                  Employee?
+  client                    Client?
+  notifications             Notification[]
+  presence                  Presence?
+  ownedRooms                Room[]         @relation("RoomOwner")
+  roomMembers               RoomMember[]
+  messages                  Message[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  CLIENT
+  EMPLOYEE
+}
+
+enum SignupMethod {
+  EMAIL
+  GOOGLE
+}
+
+model Employee {
+  id                  String       @id @default(uuid())
+  name                String
+  role                EmployeeRole @default(SALES)
+  fullName            String
+  location            String
+  phone               String
+  photo               String?
+  productivity        Float        @default(0.0)
+  averageResponseTime Float        @default(0.0)
+  salary              Decimal      @db.Decimal(10, 2)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  userId              String       @unique @map("user_id")
+  user                User         @relation(fields: [userId], references: [id])
+  schedules           Schedule[]
+  requests            Request[]
+
+  @@map("employees")
+}
+
+enum EmployeeRole {
+  SALES
+  PURCHASING
+  RENTAL
+  CONSULTANT
+  SALES_MANAGER
+  GENERAL_MANAGER
+}
+
+model Schedule {
+  id            String         @id @default(uuid())
+  type          ScheduleType
+  date          DateTime
+  title         String
+  description   String?
+  rejectOn      DateTime?      @map("rejected_on")
+  acceptOn      DateTime?      @map("accept_on")
+  canceledAt    DateTime?      @map("canceled_at")
+  cancelReason  String?        @map("cancel_reason")
+  completedAt   DateTime?      @map("completed_at")
+  completeNote  String?        @map("complete_note")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+  employeeId    String         @map("employee_id")
+  employee      Employee       @relation(fields: [employeeId], references: [id])
+  requestId     String?        @map("request_id")
+  request       Request?       @relation(fields: [requestId], references: [id])
+  notifications Notification[]
+
+  // deal
+  @@map("schedules")
+}
+
+enum ScheduleType {
+  PERSONAL
+  DEAL
+  REQUEST
+}
+
+model Client {
+  id                     String          @id @default(uuid())
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  location               String?
+  longitude              Float?
+  latitude               Float?
+  name                   String
+  phone                  String?         @unique
+  photo                  String?
+  preferredLocation      String?
+  minimalPreferredPrice  Int?
+  maximumPreferredPrice  Int?
+  preferredNumberOfRooms Int?
+  visitorSessionId       String?         @map("visitor_session_id")
+  visitorSession         VisitorSession? @relation(fields: [visitorSessionId], references: [id])
+  userId                 String          @unique
+  user                   User            @relation(fields: [userId], references: [id])
+  requests               Request[]
+  properties             Property[]
+
+  @@map("clients")
+}
+
+model Request {
+  id            String        @id @default(uuid())
+  type          RequestType
+  status        RequestStatus @default(PENDING)
+  sellData      Json?
+  message       String?
+  notes         Json?
+  isDealCreated Boolean       @default(false) @map("is_deal_created")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  clientId      String
+  client        Client        @relation(fields: [clientId], references: [id])
+  employeeId    String?       @map("employee_id")
+  employee      Employee?     @relation(fields: [employeeId], references: [id])
+  schedules     Schedule[]
+  propertyId    String?
+  property      Property?     @relation(fields: [propertyId], references: [id])
+
+  @@map("requests")
+}
+
+enum RequestType {
+  SELL
+  BUY
+  RENT
+  LEASE
+}
+
+enum RequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+model Property {
+  id                 String         @id @default(uuid())
+  clientId           String         @map("client_id")
+  client             Client         @relation(fields: [clientId], references: [id])
+  //CODE
+  referenceCode      String?        @unique @map("reference_code")
+  zipCode            Float          @map("zip_code")
+  // TYPE
+  type               PropertyType
+  listingType        ListingType    @map("listing_type")
+  // DESCRIPTION
+  simpleDescription  String?        @map("simple_description")
+  fullDescription    String?        @map("full_description")
+  // LOCATION
+  location           String         @map("location")
+  city               String
+  address            String?
+  latitude           Float?
+  longitude          Float?
+  // PRICING
+  rentalPeriod       Int?           @map("rental_period")
+  listedPrice        Float?         @map("listed_price")
+  // AREA
+  sqft               Float
+  // ROOMS
+  roomItems          RoomItem[]
+  numOfRooms         Int?           @map("num_of_rooms")
+  bathrooms          Float?         @map("bathrooms")
+  // FEATURES FOR ALL
+  heating            Status         @default(NOT_AVAILABLE)
+  furnishing         FurnishingType @default(UNFURNISHED)
+  // FEATURES :HOUSE , VILLA
+  numOfFloors        Int?           @map("num_of_floors")
+  // FEATURES :APARTMENT, HALL, STORE
+  floorNumber        Int?           @map("floor_number")
+  elevator           Boolean?       @default(false)
+  parking            Status         @default(NOT_AVAILABLE) @map("parking")
+  // EXTRA FEATURES
+  fireplace          Boolean?       @default(false)
+  hasBasement        Boolean?       @default(false)
+  basementArea       Float?         @map("basement_area")
+  internalGarageArea Float?         @map("internal_garage_area")
+  // IMAGES
+  primaryPhoto       String         @map("primary_photo")
+  galleryPhoto       Json           @map("gallery_photo")
+  // NEARBY AMENITIES
+  nearbyPlaces       Json?          @map("nearby_places")
+  // QUALITY & FINISHING 1–5
+  finishingQuality   Int            @map("finishing_quality")
+  maintenanceLevel   Int            @map("maintenance_level")
+  neighborhoodScore  Float          @map("neighborhood_score")
+  exteriorFinish     Int            @map("exterior_finish")
+  // YEAR
+  constructionYear   Int            @map("construction_year")
+  // OUTDOOR ITEMS
+  outdoorItems       OutdoorItem[]
+  // STATUS
+  status             Status         @default(NOT_AVAILABLE)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  requests           Request[]
+
+  @@map("properties")
+}
+
+model RoomItem {
+  id               String   @id @default(uuid())
+  type             RoomType
+  size             Float
+  data             Json?
+  photos           Json
+  description      String?
+  paintDescription String
+  hasBalcony       Boolean  @default(false)
+  bathroomWeight   Float?
+  balconyData      Json?
+  propertyId       String
+  property         Property @relation(fields: [propertyId], references: [id])
+
+  @@map("room_items")
+}
+
+model OutdoorItem {
+  id          String          @id @default(uuid())
+  type        OutdoorItemType
+  data        Json?
+  description String?
+  photos      Json
+  propertyId  String
+  property    Property        @relation(fields: [propertyId], references: [id])
+
+  @@map("outdoor_items")
+}
+
+enum RoomType {
+  BEDROOM
+  MASTER_BEDROOM
+  ENSUITE_BATHROOM
+  BATHROOM
+  LIVING_ROOM
+  GUEST_BEDROOM
+  FAMILY_ROOM
+  KITCHEN
+  DINING_ROOM
+  FOYER
+  POWDER_ROOM
+  OTHER
+}
+
+enum OutdoorItemType {
+  POOL
+  GARDEN
+  OUTDOOR_AREA
+  EXTERNAL_GARAGE
+  OTHER
+}
+
+enum PropertyType {
+  APARTMENT
+  VILLA
+  HOUSE
+  STORE
+  HALL
+}
+
+enum Status {
+  AVAILABLE
+  NOT_AVAILABLE
+}
+
+enum ListingType {
+  SALE
+  RENT
+}
+
+enum FurnishingType {
+  FULLY_FURNISHED
+  SEMI_FURNISHED
+  UNFURNISHED
+}
+
+model Notification {
+  id               String          @id @default(uuid())
+  title            String
+  body             String
+  data             Json?
+  isRead           Boolean         @default(false) @map("is_read")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  userId           String?         @map("user_id")
+  visitorSessionId String?         @map("visitor_session_id")
+  entityType       entityType?     @map("entity_type")
+  entityId         String?         @map("entity_id")
+  user             User?           @relation(fields: [userId], references: [id])
+  visitorSession   VisitorSession? @relation(fields: [visitorSessionId], references: [id])
+  schedule         Schedule?       @relation(fields: [entityId], references: [id])
+
+  @@map("user_notifications")
+}
+
+enum entityType {
+  SCHEDULE
+}
+
+model Presence {
+  id        String         @id @default(uuid())
+  status    PresenceStatus @default(OFFLINE)
+  lastSeen  DateTime?
+  updatedAt DateTime       @updatedAt
+  userId    String         @unique
+  user      User           @relation(fields: [userId], references: [id])
+
+  @@map("presence")
+}
+
+enum PresenceStatus {
+  ONLINE
+  OFFLINE
+}
+
+model Room {
+  id            String       @id @default(uuid())
+  name          String?
+  image         String?
+  description   String?
+  type          RoomCategory
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at")
+  ownerId       String?      @map("owner_id")
+  owner         User?        @relation("RoomOwner", fields: [ownerId], references: [id])
+  lastMessageId String?      @unique @map("last_message_id")
+  lastMessage   Message?     @relation("RoomLastMessage", fields: [lastMessageId], references: [id])
+  roomMembers   RoomMember[]
+  messages      Message[]
+
+  @@map("rooms")
+}
+
+enum RoomCategory {
+  private
+  group
+}
+
+model RoomMember {
+  id                String   @id @default(uuid())
+  lastReadMessageId Int?     @map("last_read_message_id")
+  joinedAt          DateTime @default(now()) @map("joined_at")
+  roomId            String
+  room              Room     @relation(fields: [roomId], references: [id])
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+
+  @@map("room_members")
+}
+
+model Message {
+  id                String   @id @default(uuid())
+  message           String?
+  isEdited          Boolean  @default(false) @map("is_edited")
+  isDeleted         Boolean  @default(false) @map("is_deleted")
+  createdAt         DateTime @default(now()) @map("created_at")
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  roomId            String
+  room              Room     @relation(fields: [roomId], references: [id])
+  roomAsLastMessage Room?    @relation("RoomLastMessage")
+
+  @@map("messages")
+}
