@@ -1,3 +1,5 @@
+const AppError = require('../../utils/appError');
+
 class EmployeeController {
   constructor(employeeService) {
     this.employeeService = employeeService;
@@ -10,9 +12,13 @@ class EmployeeController {
 
     const employee = await this.employeeService.createEmployee(data);
 
+    if (!employee) {
+      return next(new AppError('Failed to create employee'));
+    }
+
     res.status(201).json({
-      status: ' success ',
-      data: employee,
+      status: 'success',
+      message: 'Employee created successfully',
     });
   }
 }

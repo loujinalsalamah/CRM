@@ -9,7 +9,6 @@ class EmployeeRepository {
         data: {
           email: data.email,
           password: data.password,
-          name: data.name,
           role: 'EMPLOYEE',
           otpVerified: true,
         },
@@ -18,7 +17,7 @@ class EmployeeRepository {
       const employee = await tx.employee.create({
         data: {
           name: data.name,
-          role: data.type,
+          role: data.role,
           fullName: data.fullName,
           location: data.location,
           phone: data.phone,

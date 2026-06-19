@@ -21,7 +21,7 @@ const router = express.Router();
 router.post(
   '/',
   catchAsync(protect),
-  restrictTo('MANAGER'),
+  restrictTo('GENERAL_MANAGER'),
   validate({ body: createEmployeeSchema }),
   catchAsync(employeeController.createEmployee),
 );

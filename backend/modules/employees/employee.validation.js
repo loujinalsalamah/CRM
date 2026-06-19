@@ -1,6 +1,6 @@
 const { z } = require('zod');
 
-const EmployeeTypeEnum = z.enum([
+const EmployeeRoleEnum = z.enum([
   'SALES',
   'PURCHASING',
   'RENTAL',
@@ -11,7 +11,7 @@ const EmployeeTypeEnum = z.enum([
 
 const createEmployeeSchema = z.object({
   name: z.string().min(4).max(20),
-  type: EmployeeTypeEnum,
+  role: EmployeeRoleEnum,
   fullName: z.string().min(5).max(50),
   location: z.string().min(2).max(100),
   phone: z.string().min(10).max(15),
