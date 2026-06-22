@@ -7,7 +7,6 @@ class AuthRepository {
     return this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
-          name: data.name,
           email: data.email,
           password: data.password,
           otp: data.otp,
