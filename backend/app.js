@@ -34,6 +34,13 @@ app.use('/api/v1/auth', userRoutes);
 app.use('/api/v1/schedules', scheduleRoutes);
 app.use('/api/v1/employees', employeeRoutes);
 
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Welcome to the CRM API! Server is running smoothly.',
+  });
+});
+
 app.all(/.*/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
