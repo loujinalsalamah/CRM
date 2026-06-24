@@ -22,18 +22,24 @@ class AuthService {
 
     const { otp, hashedOtp, expires } = generateOtp();
 
-    try {
-      await sendEmail({
-        email: 'weehaghamel@gmail.com', //'amjadmhmoud3@gmail.com', // email
-        subject: 'Your OTP Code (valid for 5 minutes)',
-        message: `Your verification code is: ${otp}`,
-      });
-    } catch (err) {
-      throw new AppError(
-        'There was an error sending the email, Try again later!',
-        500,
-      );
-    }
+    // try {
+    //   await sendEmail({
+    //     email: 'weehaghamel@gmail.com', //'amjadmhmoud3@gmail.com', // email
+    //     subject: 'Your OTP Code (valid for 5 minutes)',
+    //     message: `Your verification code is: ${otp}`,
+    //   });
+    // } catch (err) {
+    //   throw new AppError(
+    //     'There was an error sending the email, Try again later!',
+    //     500,
+    //   );
+    // }
+
+    sendEmail({
+      email: 'weehaghamel@gmail.com', //'amjadmhmoud3@gmail.com', // email
+      subject: 'Your OTP Code (valid for 5 minutes)',
+      message: `Your verification code is: ${otp}`,
+    });
 
     const hashedPassword = await hashPassword(password);
 
@@ -78,23 +84,29 @@ class AuthService {
 
     const { otp, hashedOtp, expires } = generateOtp();
 
-    try {
-      await sendEmail({
-        email: 'weehaghamel@gmail.com', // user.email
-        subject: 'Your password reset otp (valid for 10 min)',
-        message: `Your password reset otp is: ${otp}`,
-      });
-    } catch (err) {
-      await this.authRepository.updatedUser(user.id, {
-        passwordResetOtp: null,
-        passwordResetExpires: null,
-      });
+    // try {
+    //   await sendEmail({
+    //     email: 'weehaghamel@gmail.com', // user.email
+    //     subject: 'Your password reset otp (valid for 10 min)',
+    //     message: `Your password reset otp is: ${otp}`,
+    //   });
+    // } catch (err) {
+    //   await this.authRepository.updatedUser(user.id, {
+    //     passwordResetOtp: null,
+    //     passwordResetExpires: null,
+    //   });
 
-      throw new AppError(
-        'There was an error sending the email, Try again later!',
-        500,
-      );
-    }
+    //   throw new AppError(
+    //     'There was an error sending the email, Try again later!',
+    //     500,
+    //   );
+    // }
+
+    sendEmail({
+      email: 'weehaghamel@gmail.com', //'amjadmhmoud3@gmail.com', // email
+      subject: 'Your OTP Code (valid for 5 minutes)',
+      message: `Your verification code is: ${otp}`,
+    });
 
     return this.authRepository.updatedUser(user.id, {
       passwordResetOtp: hashedOtp,
@@ -203,18 +215,24 @@ class AuthService {
 
     const { otp, hashedOtp, expires } = generateOtp();
 
-    try {
-      await sendEmail({
-        email: 'weehaghamel@gmail.com', // user.email
-        subject: 'Your OTP Code (valid for 5 minutes)',
-        message: `Your verification code is: ${otp}`,
-      });
-    } catch (err) {
-      throw new AppError(
-        'There was an error sending the email, Try again later!',
-        500,
-      );
-    }
+    // try {
+    //   await sendEmail({
+    //     email: 'weehaghamel@gmail.com', // user.email
+    //     subject: 'Your OTP Code (valid for 5 minutes)',
+    //     message: `Your verification code is: ${otp}`,
+    //   });
+    // } catch (err) {
+    //   throw new AppError(
+    //     'There was an error sending the email, Try again later!',
+    //     500,
+    //   );
+    // }
+
+    sendEmail({
+      email: 'weehaghamel@gmail.com', //'amjadmhmoud3@gmail.com', // email
+      subject: 'Your OTP Code (valid for 5 minutes)',
+      message: `Your verification code is: ${otp}`,
+    });
 
     return this.authRepository.updatedUser(user.id, {
       otp: hashedOtp,
