@@ -21,6 +21,11 @@ const createEmployeeSchema = z.object({
   password: z.string().min(8).max(100),
 });
 
+const employeeIdSchema = z.object({
+  id: z.string().uuid(),
+});
+
 module.exports = {
   createEmployeeSchema,
+  employeeIdSchema,
 };

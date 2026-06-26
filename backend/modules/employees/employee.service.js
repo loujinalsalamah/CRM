@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 const hashPassword = require('../../utils/hashPassword');
 
 class EmployeeService {
@@ -13,6 +14,24 @@ class EmployeeService {
       ...data,
       password: hashedPassword,
     });
+  }
+
+  async getAllEmployees(queryString) {
+    const employees =
+      await this.employeeRepository.findAllEmployees(queryString);
+
+    for (const employee of employees) {
+      employee.totalDeals = 20;
+    }
+    return employees;
+  }
+
+  async getEmployee(id) {
+    const employee = await this.employeeRepository.findEmployeeById(id);
+
+    employee.totalDeals = 20;
+
+    return employee;
   }
 }
 

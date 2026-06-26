@@ -5,7 +5,10 @@ const validate = require('../../middlewares/validate');
 const protect = require('../../middlewares/protect');
 const restrictTo = require('../../middlewares/restrictTo');
 
-const { createEmployeeSchema } = require('./employee.validation');
+const {
+  createEmployeeSchema,
+  employeeIdSchema,
+} = require('./employee.validation');
 
 const prisma = require('../../db');
 const EmployeeRepository = require('./employee.repository');
@@ -27,11 +30,18 @@ router.post(
 );
 
 router.get(
+  '/:id',
+  catchAsync(protect),
+  restrictTo('GENERAL_MANAGER', 'SALES_MANAGER'),
+  validate({ params: employeeIdSchema }),
+  catchAsync(employeeController.getEmployee),
+);
+
+router.get(
   '/',
   catchAsync(protect),
-  restrictTo('GENERAL_MANAGER'),
-  validate({ body: createEmployeeSchema }),
-  catchAsync(employeeController.createEmployee),
+  restrictTo('GENERAL_MANAGER', 'SALES_MANAGER'),
+  catchAsync(employeeController.getAllEmployees),
 );
 
 module.exports = router;

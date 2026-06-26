@@ -1,3 +1,5 @@
+const APIFeatures = require('../../utils/apiFeatures');
+
 class EmployeeRepository {
   constructor(prisma) {
     this.prisma = prisma;
@@ -29,6 +31,42 @@ class EmployeeRepository {
 
       return employee;
     });
+  }
+
+  findAllEmployees(queryString) {
+    queryString.select = 'id,name,fullName,photo,role,location,productivity';
+
+    let features = new APIFeatures(queryString);
+
+    features = features.filter();
+    features = features.sort();
+    features = features.limitFields();
+
+    return this.prisma.employee.findMany(features.options);
+  }
+
+  findEmployeeById(id) {
+    const select = {
+      id: true,
+      name: true,
+      fullName: true,
+      photo: true,
+      phone: true,
+      role: true,
+      location: true,
+      productivity: true,
+      averageResponseTime: true,
+      salary: true,
+      createdAt: true,
+      updatedAt: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+    };
+    return this.prisma.employee.findUnique({ where: { id }, select });
   }
 
   findBestConsultant() {

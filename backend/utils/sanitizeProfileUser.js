@@ -31,6 +31,7 @@ module.exports = function sanitizeProfileUser(user) {
     const { name, userId, ...cleanEmployee } = cleanUser.employee;
 
     cleanUser.employee = cleanEmployee;
+
     delete cleanUser.client;
   }
 
