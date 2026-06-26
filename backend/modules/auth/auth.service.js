@@ -24,7 +24,7 @@ class AuthService {
 
     try {
       await sendEmail({
-        email: 'weehaghamel@gmail.com', // 'amjadmhmoud3@gmail.com',  // email
+        email: 'amjadmhmoud3@gmail.com', //'weehaghamel@gmail.com', // ' // email
         subject: 'Your OTP Code (valid for 5 minutes)',
         message: `Your verification code is: ${otp}`,
       });

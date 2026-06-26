@@ -1,23 +1,49 @@
 const AppError = require('../../utils/appError');
 
 class RequestService {
-  constructor(requestRepository, employeeRepository) {
+  constructor(requestRepository, employeeRepository, propertyRepository) {
     this.requestRepository = requestRepository;
     this.employeeRepository = employeeRepository;
+    this.propertyRepository = propertyRepository;
   }
 
-  async createRequest(clientId, data) {
-    if (data.type === 'SELL' || data.type === 'RENT') {
-      const employee = await this.employeeRepository.findBestConsultant();
-      data = {
-        // eslint-disable-next-line node/no-unsupported-features/es-syntax
-        ...data,
-        clientId,
-        employeeId: employee.id,
-      };
-    } else {
+  async createSellRequest(clientId, data) {
+    const employee = await this.employeeRepository.findBestConsultant();
+    data = {
       // eslint-disable-next-line node/no-unsupported-features/es-syntax
-      data = { ...data, clientId };
+      ...data,
+      clientId,
+      employeeId: employee.id,
+    };
+
+    return this.requestRepository.createRequest(clientId, data);
+  }
+
+  async createBuyRequest(clientId, data) {
+    data = { ...data, clientId };
+
+    const { propertyId } = data;
+
+    const property = await this.propertyRepository.findPropertyById(propertyId);
+
+    if (!property) {
+      throw new AppError('Property not found', 404);
+    }
+
+    if (!property.status === 'AVAILABLE') {
+      throw new AppError('Property is not available', 400);
+    }
+
+    const request = await this.requestRepository.findDuplicateRequest(
+      propertyId,
+      clientId,
+    );
+
+    if (request) {
+      throw new AppError(
+        'You have already submitted a request for this property',
+        400,
+      );
     }
     return this.requestRepository.createRequest(data);
   }
