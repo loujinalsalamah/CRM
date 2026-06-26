@@ -26,4 +26,12 @@ router.post(
   catchAsync(employeeController.createEmployee),
 );
 
+router.get(
+  '/',
+  catchAsync(protect),
+  restrictTo('GENERAL_MANAGER'),
+  validate({ body: createEmployeeSchema }),
+  catchAsync(employeeController.createEmployee),
+);
+
 module.exports = router;

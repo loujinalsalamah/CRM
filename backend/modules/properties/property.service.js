@@ -28,8 +28,8 @@ class PropertyService {
       } else {
         roomItem.bathroomWeight = 0;
         if (
-          roomItem.type !== 'KITCHEN' ||
-          roomItem.type !== 'FOYER' ||
+          roomItem.type !== 'KITCHEN' &&
+          roomItem.type !== 'FOYER' &&
           roomItem.type !== 'OTHER'
         ) {
           numOfRooms += 1;
@@ -54,7 +54,7 @@ class PropertyService {
     return this.propertyRepository.createProperty(requestId, {
       ...data,
       listedPrice: 7000.0,
-      clientId: request.clientId,
+      clientId: request.client.id,
     });
   }
 

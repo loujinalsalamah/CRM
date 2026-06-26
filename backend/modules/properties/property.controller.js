@@ -20,7 +20,7 @@ class PropertyController {
 
     res.status(201).json({
       status: 'success',
-      data: property,
+      message: 'property created successfully',
     });
   }
 
