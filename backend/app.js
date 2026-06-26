@@ -12,6 +12,7 @@ const notificationRoutes = require('./modules/notifications/notification.routes'
 const userRoutes = require('./modules/auth/auth.routes');
 const scheduleRoutes = require('./modules/schedules/schedule.routes');
 const employeeRoutes = require('./modules/employees/employee.routes');
+const clientRoutes = require('./modules/clients/client.routes');
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/auth', userRoutes);
 app.use('/api/v1/schedules', scheduleRoutes);
 app.use('/api/v1/employees', employeeRoutes);
+app.use('/api/v1/clients', clientRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({

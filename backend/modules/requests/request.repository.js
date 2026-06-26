@@ -48,7 +48,7 @@ class RequestRepository {
         client: {
           select: {
             id: true,
-            location: true, // تم تعديل L إلى l صغيرة هنا
+            location: true,
             name: true,
             phone: true,
             userId: true,

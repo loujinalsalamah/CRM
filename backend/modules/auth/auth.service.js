@@ -24,7 +24,7 @@ class AuthService {
 
     try {
       await sendEmail({
-        email: 'weehaghamel@gmail.com', // 'amjadmhmoud3@gmail.com',  // email
+        email: 'amjadmhmoud3@gmail.com', //'weehaghamel@gmail.com',  // email
         subject: 'Your OTP Code (valid for 5 minutes)',
         message: `Your verification code is: ${otp}`,
       });
@@ -80,7 +80,7 @@ class AuthService {
 
     try {
       await sendEmail({
-        email: 'weehaghamel@gmail.com', // user.email
+        email: 'amjadmhmoud3@gmail.com', // user.email
         subject: 'Your password reset otp (valid for 10 min)',
         message: `Your password reset otp is: ${otp}`,
       });
@@ -205,7 +205,7 @@ class AuthService {
 
     try {
       await sendEmail({
-        email: 'weehaghamel@gmail.com', // user.email
+        email: 'amjadmhmoud3@gmail.com', // user.email
         subject: 'Your OTP Code (valid for 5 minutes)',
         message: `Your verification code is: ${otp}`,
       });

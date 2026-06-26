@@ -1,7 +1,5 @@
 const express = require('express');
-
 const protect = require('../../middlewares/protect');
-
 const catchAsync = require('../../utils/catchAsync');
 const validate = require('../../middlewares/validate');
 
