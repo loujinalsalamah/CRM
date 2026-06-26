@@ -1,5 +1,9 @@
+const http = require('http');
 const dotenv = require('dotenv');
 const prisma = require('./db');
+const createSocketServer = require('./socket/socketServer');
+const notificationSocket = require('./socket/notificationSocket');
+const { setIo } = require('./socket/io');
 
 dotenv.config({ path: './config.env' });
 
@@ -19,6 +23,14 @@ connection();
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, '0.0.0.0', () => {
+const server = http.createServer(app);
+
+const io = createSocketServer(server);
+
+setIo(io);
+
+notificationSocket(io);
+
+server.listen(port, '0.0.0.0', () => {
   console.log(`App running on port ${port}...`);
 });

@@ -1,6 +1,5 @@
 const express = require('express');
 const morgan = require('morgan');
-const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 const AppError = require('./utils/appError');
@@ -15,8 +14,6 @@ const employeeRoutes = require('./modules/employees/employee.routes');
 const clientRoutes = require('./modules/clients/client.routes');
 
 const app = express();
-
-app.use(cors());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -35,13 +32,6 @@ app.use('/api/v1/auth', userRoutes);
 app.use('/api/v1/schedules', scheduleRoutes);
 app.use('/api/v1/employees', employeeRoutes);
 app.use('/api/v1/clients', clientRoutes);
-
-app.get('/', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'Welcome to the CRM API! Server is running smoothly.',
-  });
-});
 
 app.all(/.*/, (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

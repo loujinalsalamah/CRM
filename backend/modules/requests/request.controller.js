@@ -1,20 +1,33 @@
 class RequestController {
   constructor(requestService) {
     this.requestService = requestService;
-    this.createRequest = this.createRequest.bind(this);
+    this.createSellRequest = this.createSellRequest.bind(this);
+    this.createBuyRequest = this.createBuyRequest.bind(this);
     this.getMyRequests = this.getMyRequests.bind(this);
     this.getRequestById = this.getRequestById.bind(this);
   }
 
-  async createRequest(req, res, next) {
+  async createSellRequest(req, res, next) {
     const clientId = req.user.client.id;
     const data = req.body;
 
-    const request = await this.requestService.createRequest(clientId, data);
+    await this.requestService.createSellRequest(clientId, data);
 
     res.status(201).json({
       status: 'success',
-      data: request,
+      message: 'Request created successfully',
+    });
+  }
+
+  async createBuyRequest(req, res, next) {
+    const clientId = req.user.client.id;
+    const data = req.body;
+
+    await this.requestService.createBuyRequest(clientId, data);
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Request created successfully',
     });
   }
 

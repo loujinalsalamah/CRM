@@ -15,13 +15,17 @@ class RequestRepository {
     let features = new APIFeatures(queryString);
 
     const select = {
+      id: true,
+      type: true,
       status: true,
       sellData: true,
       createdAt: true,
       client: {
         select: {
+          id: true,
           name: true,
           photo: true,
+          userId: true,
         },
       },
     };
@@ -54,6 +58,15 @@ class RequestRepository {
             userId: true,
           },
         },
+      },
+    });
+  }
+
+  findDuplicateRequest(propertyId, clientId) {
+    return this.requestModel.findFirst({
+      where: {
+        propertyId,
+        clientId,
       },
     });
   }
