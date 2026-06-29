@@ -45,7 +45,14 @@ class RequestService {
         400,
       );
     }
-    return this.requestRepository.createRequest(data);
+    return this.requestRepository.createRequest({
+      ...data,
+      status: 'COMPLETED',
+    });
+  }
+
+  getAllRequests(queryString) {
+    return this.requestRepository.findAllRequests(queryString);
   }
 
   async getMyRequests(employeeId, queryString) {

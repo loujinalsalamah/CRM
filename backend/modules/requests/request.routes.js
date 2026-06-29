@@ -36,7 +36,7 @@ router.post(
 );
 
 router.get(
-  '/allRequests',
+  '/',
   catchAsync(protect),
   restrictTo('SALES_MANAGER'),
   catchAsync(requestController.getAllRequests),

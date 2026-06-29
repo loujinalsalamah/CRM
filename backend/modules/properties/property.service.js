@@ -1,3 +1,4 @@
+const AppError = require('../../utils/appError');
 /* eslint-disable prefer-destructuring */
 /* eslint-disable node/no-unsupported-features/es-syntax */
 /* eslint-disable no-restricted-syntax */
@@ -13,6 +14,13 @@ class PropertyService {
     delete data.requestId;
 
     const request = await this.requestRepository.findRequestById(requestId);
+
+    if (request.propertyId) {
+      throw new AppError('Property already created for this request', 400);
+    }
+    await this.requestRepository.updateRequest(requestId, {
+      status: 'COMPLETED',
+    });
 
     //bathrooms weight
     let numOfRooms = 0;

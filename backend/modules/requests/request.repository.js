@@ -9,6 +9,38 @@ class RequestRepository {
     return this.prisma.request.create({ data });
   }
 
+  findAllRequests(queryString) {
+    let features = new APIFeatures(queryString);
+
+    const select = {
+      id: true,
+      type: true,
+      message: true,
+      client: {
+        select: {
+          name: true,
+          photo: true,
+        },
+      },
+      property: {
+        select: {
+          referenceCode: true,
+          location: true,
+          listedPrice: true,
+          simpleDescription: true,
+        },
+      },
+    };
+
+    features = features.filter();
+    features = features.sort();
+    features = features.paginate();
+
+    features.options.where.status = 'COMPLETED';
+    features.options.select = select;
+    return this.prisma.request.findMany(features.options);
+  }
+
   findAllConsultantRequests(employeeId, queryString) {
     let features = new APIFeatures(queryString);
 
@@ -56,6 +88,7 @@ class RequestRepository {
             userId: true,
           },
         },
+        propertyId: true,
       },
     });
   }
@@ -71,6 +104,10 @@ class RequestRepository {
 
   countRequestsByStatus(employeeId, status) {
     return this.prisma.request.count({ where: { employeeId, status } });
+  }
+
+  updateRequest(id, data) {
+    return this.prisma.request.update({ where: { id }, data });
   }
 }
 

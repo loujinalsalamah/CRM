@@ -3,6 +3,7 @@ class RequestController {
     this.requestService = requestService;
     this.createSellRequest = this.createSellRequest.bind(this);
     this.createBuyRequest = this.createBuyRequest.bind(this);
+    this.getAllRequests = this.getAllRequests.bind(this);
     this.getMyRequests = this.getMyRequests.bind(this);
     this.getRequestById = this.getRequestById.bind(this);
     this.getRequestsStats = this.getRequestsStats.bind(this);
