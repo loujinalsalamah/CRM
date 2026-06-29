@@ -76,5 +76,35 @@ class RequestService {
 
     return request;
   }
+
+  async getRequestsStats(employeeId) {
+    const newRequests = await this.requestRepository.countRequestsByStatus(
+      employeeId,
+      'PENDING',
+    );
+
+    const inProgressRequests =
+      await this.requestRepository.countRequestsByStatus(
+        employeeId,
+        'IN_PROGRESS',
+      );
+
+    const completeRequests = await this.requestRepository.countRequestsByStatus(
+      employeeId,
+      'COMPLETED',
+    );
+
+    const rejectRequests = await this.requestRepository.countRequestsByStatus(
+      employeeId,
+      'REJECTED',
+    );
+
+    return {
+      newRequests,
+      completeRequests,
+      rejectRequests,
+      inProgressRequests,
+    };
+  }
 }
 module.exports = RequestService;

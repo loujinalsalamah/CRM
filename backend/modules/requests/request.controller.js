@@ -5,6 +5,7 @@ class RequestController {
     this.createBuyRequest = this.createBuyRequest.bind(this);
     this.getMyRequests = this.getMyRequests.bind(this);
     this.getRequestById = this.getRequestById.bind(this);
+    this.getRequestsStats = this.getRequestsStats.bind(this);
   }
 
   async createSellRequest(req, res, next) {
@@ -55,6 +56,17 @@ class RequestController {
     res.status(200).json({
       status: 'success',
       data: request,
+    });
+  }
+
+  async getRequestsStats(req, res, next) {
+    const employeeId = req.user.employee.id;
+
+    const stats = await this.requestService.getRequestsStats(employeeId);
+
+    res.status(200).json({
+      status: 'success',
+      data: stats,
     });
   }
 }

@@ -2,7 +2,7 @@ const APIFeatures = require('../../utils/apiFeatures');
 
 class RequestRepository {
   constructor(prisma) {
-    this.requestModel = prisma.request;
+    this.prisma = prisma;
   }
 
   createRequest(data) {
@@ -35,11 +35,11 @@ class RequestRepository {
 
     features.options.select = select;
     features.options.where.employeeId = employeeId;
-    return this.requestModel.findMany(features.options);
+    return this.prisma.request.findMany(features.options);
   }
 
   findRequestById(id) {
-    return this.requestModel.findUnique({
+    return this.prisma.request.findUnique({
       where: { id },
       select: {
         id: true,
@@ -63,12 +63,16 @@ class RequestRepository {
   }
 
   findDuplicateRequest(propertyId, clientId) {
-    return this.requestModel.findFirst({
+    return this.prisma.request.findFirst({
       where: {
         propertyId,
         clientId,
       },
     });
+  }
+
+  countRequestsByStatus(employeeId, status) {
+    return this.prisma.request.count({ where: { employeeId, status } });
   }
 }
 

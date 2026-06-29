@@ -43,6 +43,13 @@ router.get(
 );
 
 router.get(
+  '/stats',
+  catchAsync(protect),
+  restrictTo('CONSULTANT'),
+  catchAsync(requestController.getRequestsStats),
+);
+
+router.get(
   '/:id',
   catchAsync(protect),
   restrictTo('CONSULTANT'),
