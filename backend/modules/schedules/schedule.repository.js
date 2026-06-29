@@ -5,7 +5,7 @@ class ScheduleRepository {
     this.prisma = prisma;
   }
 
-  async createScheduleWithNotification(data) {
+  async createSchedule(data) {
     return this.prisma.$transaction(async (tx) => {
       const schedule = await tx.schedule.create({
         data,
@@ -22,35 +22,12 @@ class ScheduleRepository {
         },
       });
 
-      if (schedule.type === 'PERSONAL') {
-        return schedule;
-      } else if (schedule.type === 'REQUEST') {
-        await tx.notification.create({
-          data: {
-            title: 'Schedule Request',
-            body: `Schedule for request in ${schedule.date}`,
-            userId: schedule.request.client.userId,
-            entityType: 'SCHEDULE',
-            entityId: schedule.id,
-          },
-        });
-
+      if (schedule.type === 'REQUEST') {
         await tx.request.update({
           where: { id: schedule.requestId },
           data: { status: 'IN_PROGRESS' },
         });
-      } else if (schedule.type === 'DEAL') {
-        await tx.notification.create({
-          data: {
-            title: 'Schedule Deal',
-            body: `Schedule for deal in ${schedule.date}`,
-            userId: schedule.deal.client.userId,
-            entityType: 'SCHEDULE',
-            entityId: schedule.id,
-          },
-        });
       }
-
       return schedule;
     });
   }

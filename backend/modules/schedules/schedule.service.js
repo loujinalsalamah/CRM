@@ -6,17 +6,38 @@ const sanitizeRequestSchedule = require('../../utils/sanitizeRequestSchedule');
 const sanitizeDealSchedule = require('../../utils/sanitizeDealSchedule');
 
 class ScheduleService {
-  constructor(scheduleRepository) {
+  constructor(scheduleRepository, notificationService) {
     this.scheduleRepository = scheduleRepository;
+    this.notificationService = notificationService;
   }
 
   async createSchedule(employeeId, data) {
-    return this.scheduleRepository.createScheduleWithNotification({
+    const schedule = await this.scheduleRepository.createSchedule({
       ...data,
       employeeId,
       date: new Date(data.date),
       acceptOn: null,
     });
+
+    if (schedule.type === 'REQUEST') {
+      await this.notificationService.createNotification({
+        title: 'Schedule Request',
+        body: `Schedule for request in ${schedule.date}`,
+        userId: schedule.request.client.userId,
+        entityType: 'SCHEDULE',
+        entityId: schedule.id,
+      });
+    } else if (schedule.type === 'DEAL') {
+      await this.notificationService.createNotification({
+        title: 'Schedule Deal',
+        body: `Schedule for deal in ${schedule.date}`,
+        userId: schedule.deal.client.userId,
+        entityType: 'SCHEDULE',
+        entityId: schedule.id,
+      });
+    }
+
+    return schedule;
   }
 
   async getSchedule(id) {

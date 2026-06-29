@@ -15,12 +15,18 @@ const {
 
 const prisma = require('../../db');
 const ScheduleRepository = require('./schedule.repository');
+const NotificationRepository = require('../notifications/notification.repository');
+const NotificationService = require('../notifications/notification.service');
 const ScheduleService = require('./schedule.service');
 const ScheduleController = require('./schedule.controller');
 
 const scheduleRepository = new ScheduleRepository(prisma);
-
-const scheduleService = new ScheduleService(scheduleRepository);
+const notificationRepository = new NotificationRepository(prisma);
+const notificationService = new NotificationService(notificationRepository);
+const scheduleService = new ScheduleService(
+  scheduleRepository,
+  notificationService,
+);
 const scheduleController = new ScheduleController(scheduleService);
 
 const router = express.Router();
