@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 const AppError = require('../../utils/appError');
 
 class ClientService {
@@ -29,7 +30,6 @@ class ClientService {
       queryString,
     );
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const property of properties) {
       property.bathrooms = Math.floor(property.bathrooms);
     }
