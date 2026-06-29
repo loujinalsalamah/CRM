@@ -23,6 +23,7 @@ class PropertyRepository {
   findPropertyById(id) {
     return this.prisma.property.findUnique({
       where: { id },
+      include: { roomItems: true, outdoorItems: true },
     });
   }
 
@@ -58,6 +59,22 @@ class PropertyRepository {
     return this.prisma.property.count({
       where: { type },
     });
+  }
+
+  findPropertiesByIds(ids, queryString) {
+    queryString.select =
+      'id,referenceCode,type,listingType,simpleDescription,city,listedPrice,sqft,numOfRooms,bathrooms,primaryPhoto';
+
+    let features = new APIFeatures(queryString);
+
+    features = features.filter();
+    features = features.sort();
+    features = features.limitFields();
+    features = features.paginate();
+
+    features.options.where.id = { in: ids };
+
+    return this.prisma.property.findMany(features.options);
   }
 }
 module.exports = PropertyRepository;

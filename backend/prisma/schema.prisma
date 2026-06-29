@@ -138,6 +138,7 @@ model Client {
   minimalPreferredPrice  Int?
   maximumPreferredPrice  Int?
   preferredNumberOfRooms Int?
+  favoritePropertyIds    String[]
   visitorSessionId       String?         @map("visitor_session_id")
   visitorSession         VisitorSession? @relation(fields: [visitorSessionId], references: [id])
   userId                 String          @unique

@@ -9,6 +9,11 @@ const updateMeSchema = z.object({
   photo: z.string().optional(),
 });
 
+const favoriteIdSchema = z.object({
+  propertyId: z.string().uuid(),
+});
+
 module.exports = {
   updateMeSchema,
+  favoriteIdSchema,
 };
