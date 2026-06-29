@@ -16,7 +16,7 @@ class RequestService {
       employeeId: employee.id,
     };
 
-    return this.requestRepository.createRequest(clientId, data);
+    return this.requestRepository.createRequest(data);
   }
 
   async createBuyRequest(clientId, data) {

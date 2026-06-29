@@ -32,6 +32,18 @@ class RequestController {
     });
   }
 
+  async getAllRequests(req, res, next) {
+    const queryString = req.query;
+
+    const requests = await this.requestService.getAllRequests(queryString);
+
+    res.status(200).json({
+      status: 'success',
+      results: requests.length,
+      data: requests,
+    });
+  }
+
   async getMyRequests(req, res, next) {
     const employeeId = req.user.employee.id;
     const queryString = req.query;

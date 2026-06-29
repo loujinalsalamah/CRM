@@ -24,10 +24,17 @@ class ClientService {
       return [];
     }
 
-    return this.propertyRepository.findPropertiesByIds(
+    const properties = await this.propertyRepository.findPropertiesByIds(
       client.favoritePropertyIds,
       queryString,
     );
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const property of properties) {
+      property.bathrooms = Math.floor(property.bathrooms);
+    }
+
+    return properties;
   }
 
   async addToFavorite(clientId, data) {

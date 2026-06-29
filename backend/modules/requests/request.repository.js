@@ -6,9 +6,7 @@ class RequestRepository {
   }
 
   createRequest(data) {
-    return this.requestModel.create({
-      data,
-    });
+    return this.prisma.request.create({ data });
   }
 
   findAllConsultantRequests(employeeId, queryString) {
