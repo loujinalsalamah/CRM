@@ -18,16 +18,18 @@ class RequestRepository {
       message: true,
       client: {
         select: {
+          id: true,
           name: true,
           photo: true,
         },
       },
       property: {
         select: {
+          id: true,
           referenceCode: true,
           location: true,
           listedPrice: true,
-          simpleDescription: true,
+          fullDescription: true,
         },
       },
     };
