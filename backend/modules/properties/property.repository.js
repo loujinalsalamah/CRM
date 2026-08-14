@@ -76,5 +76,24 @@ class PropertyRepository {
 
     return this.prisma.property.findMany(features.options);
   }
+
+  createPricingPolicy(data) {
+    return this.prisma.propertyPricingPolicy.create({ data });
+  }
+
+  updatePricingPolicy(id, data) {
+    return this.prisma.propertyPricingPolicy.update({
+      where: { id },
+      data,
+    });
+  }
+
+  findPricingPolicy(queryString) {
+    let features = new APIFeatures(queryString);
+
+    features = features.limitFields();
+
+    return this.prisma.propertyPricingPolicy.findMany(features.options);
+  }
 }
 module.exports = PropertyRepository;

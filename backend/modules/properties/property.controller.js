@@ -8,6 +8,9 @@ class PropertyController {
     this.getAllProperties = this.getAllProperties.bind(this);
     this.getProperty = this.getProperty.bind(this);
     this.searchProperties = this.searchProperties.bind(this);
+    this.createPricingPolicy = this.createPricingPolicy.bind(this);
+    this.updatePricingPolicy = this.updatePricingPolicy.bind(this);
+    this.getPricingPolicy = this.getPricingPolicy.bind(this);
   }
 
   async createProperty(req, res, next) {
@@ -95,6 +98,38 @@ class PropertyController {
       status: 'success',
       results: properties.length,
       data: properties,
+    });
+  }
+
+  async createPricingPolicy(req, res, next) {
+    const data = req.body;
+    await this.propertyService.createPricingPolicy(data);
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Pricing policy created successfully',
+    });
+  }
+
+  async updatePricingPolicy(req, res, next) {
+    const data = req.body;
+    const { id } = req.params;
+    await this.propertyService.updatePricingPolicy(id, data);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Pricing policy updated successfully',
+    });
+  }
+
+  async getPricingPolicy(req, res, next) {
+    const queryString = req.query;
+    const pricingPolicy =
+      await this.propertyService.getPricingPolicy(queryString);
+
+    res.status(200).json({
+      status: 'success',
+      data: pricingPolicy,
     });
   }
 }

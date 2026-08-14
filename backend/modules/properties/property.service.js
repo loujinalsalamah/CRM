@@ -89,5 +89,20 @@ class PropertyService {
     );
     return properties;
   }
+
+  createPricingPolicy(data) {
+    return this.propertyRepository.createPricingPolicy(data);
+  }
+
+  updatePricingPolicy(id, data) {
+    return this.propertyRepository.updatePricingPolicy(id, data);
+  }
+
+  getPricingPolicy(queryString) {
+    if (!queryString || (!queryString.propertyType && !queryString.city)) {
+      throw new AppError('City and type are required', 400);
+    }
+    return this.propertyRepository.findPricingPolicy(queryString);
+  }
 }
 module.exports = PropertyService;

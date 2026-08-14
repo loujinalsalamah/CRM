@@ -81,6 +81,7 @@ model Employee {
   user                User         @relation(fields: [userId], references: [id])
   schedules           Schedule[]
   requests            Request[]
+  deals               Deal[]
 
   @@map("employees")
 }
@@ -145,6 +146,7 @@ model Client {
   user                   User            @relation(fields: [userId], references: [id])
   requests               Request[]
   properties             Property[]
+  deals                  Deal[]
 
   @@map("clients")
 }
@@ -347,6 +349,17 @@ enum entityType {
   SCHEDULE
 }
 
+model Deal {
+  id         String    @id @default(uuid())
+  clientId   String
+  client     Client    @relation(fields: [clientId], references: [id])
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  room       Room?
+
+  @@map("deals")
+}
+
 model Presence {
   id        String         @id @default(uuid())
   status    PresenceStatus @default(OFFLINE)
@@ -355,7 +368,7 @@ model Presence {
   userId    String         @unique
   user      User           @relation(fields: [userId], references: [id])
 
-  @@map("presence")
+  @@map("presences")
 }
 
 enum PresenceStatus {
@@ -369,11 +382,13 @@ model Room {
   image         String?
   description   String?
   type          RoomCategory
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @default(now()) @updatedAt @map("updated_at")
-  ownerId       String?      @map("owner_id")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  dealId        String?      @unique @map("deal_id")
+  deal          Deal?        @relation(fields: [dealId], references: [id])
+  ownerId       String?
   owner         User?        @relation("RoomOwner", fields: [ownerId], references: [id])
-  lastMessageId String?      @unique @map("last_message_id")
+  lastMessageId String?      @unique
   lastMessage   Message?     @relation("RoomLastMessage", fields: [lastMessageId], references: [id])
   roomMembers   RoomMember[]
   messages      Message[]
@@ -382,8 +397,9 @@ model Room {
 }
 
 enum RoomCategory {
-  private
-  group
+  DEAL
+  INTERNAL_DIRECT
+  INTERNAL_GROUP
 }
 
 model RoomMember {
@@ -395,6 +411,7 @@ model RoomMember {
   userId            String
   user              User     @relation(fields: [userId], references: [id])
 
+  @@unique([roomId, userId])
   @@map("room_members")
 }
 
@@ -411,4 +428,24 @@ model Message {
   roomAsLastMessage Room?    @relation("RoomLastMessage")
 
   @@map("messages")
+}
+
+model PropertyPricingPolicy {
+  id                String       @id @default(uuid())
+  city              String
+  propertyType      PropertyType
+  //
+  sellProfitMargin  Float        @map("sell_profit_margin")
+  rentProfitMargin  Float        @map("rent_profit_margin")
+  //
+  saleListingMargin Float        @map("sale_listing_margin")
+  rentListingMargin Float        @map("rent_listing_margin")
+  //
+  saleGlobalAdjust  Float        @map("sale_global_adjust")
+  rentGlobalAdjust  Float        @map("rent_global_adjust")
+  //
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  @@map("property_pricing_policies")
 }
