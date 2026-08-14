@@ -105,8 +105,6 @@ const createPricingPolicySchema = z.object({
 });
 
 const updatePricingPolicySchema = z.object({
-  city: z.string().optional(),
-  propertyType: PropertyType.optional(),
   sellProfitMargin: z.number().optional(),
   rentProfitMargin: z.number().optional(),
   saleGlobalAdjust: z.number().optional(),

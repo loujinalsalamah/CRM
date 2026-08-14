@@ -99,7 +99,7 @@ class PropertyService {
   }
 
   getPricingPolicy(queryString) {
-    if (!queryString || (!queryString.propertyType && !queryString.city)) {
+    if (!queryString || !queryString.propertyType || !queryString.city) {
       throw new AppError('City and type are required', 400);
     }
     return this.propertyRepository.findPricingPolicy(queryString);

@@ -91,9 +91,9 @@ class PropertyRepository {
   findPricingPolicy(queryString) {
     let features = new APIFeatures(queryString);
 
-    features = features.limitFields();
+    features = features.filter();
 
-    return this.prisma.propertyPricingPolicy.findMany(features.options);
+    return this.prisma.propertyPricingPolicy.findFirst(features.options);
   }
 }
 module.exports = PropertyRepository;

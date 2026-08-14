@@ -13,9 +13,9 @@ const RequestRepository = require('../requests/request.repository');
 const {
   createPropertySchema,
   propertyIdSchema,
-  pricingPolicyIdSchema,
   createPricingPolicySchema,
   updatePricingPolicySchema,
+  pricingPolicyIdSchema,
 } = require('./property.validation');
 
 const requestRepository = new RequestRepository(prisma);
@@ -28,6 +28,29 @@ const propertyService = new PropertyService(
 const propertyController = new PropertyController(propertyService);
 
 const router = express.Router();
+
+router.get(
+  '/pricingPolicies',
+  catchAsync(protect),
+  restrictTo('GENERAL_MANAGER', 'SALES_MANAGER'),
+  catchAsync(propertyController.getPricingPolicy),
+);
+
+router.post(
+  '/pricingPolicies',
+  catchAsync(protect),
+  restrictTo('GENERAL_MANAGER'),
+  validate({ body: createPricingPolicySchema }),
+  catchAsync(propertyController.createPricingPolicy),
+);
+
+router.patch(
+  '/pricingPolicies/:id',
+  catchAsync(protect),
+  restrictTo('GENERAL_MANAGER'),
+  validate({ params: pricingPolicyIdSchema, body: updatePricingPolicySchema }),
+  catchAsync(propertyController.updatePricingPolicy),
+);
 
 router.post(
   '/',
@@ -49,27 +72,4 @@ router.get(
 
 //
 
-router.post(
-  '/pricingPolicies',
-  catchAsync(protect),
-  restrictTo('GENERAL_MANAGER'),
-  validate({ body: createPricingPolicySchema }),
-  catchAsync(propertyController.createPricingPolicy),
-);
-
-router.patch(
-  '/pricingPolicies/:id',
-  catchAsync(protect),
-  restrictTo('GENERAL_MANAGER'),
-  validate({ params: pricingPolicyIdSchema, body: updatePricingPolicySchema }),
-  catchAsync(propertyController.updatePricingPolicy),
-);
-
-router.get(
-  '/pricingPolicies/:id',
-  catchAsync(protect),
-  restrictTo('GENERAL_MANAGER', 'SALES_MANAGER'),
-  validate({ params: pricingPolicyIdSchema }),
-  catchAsync(propertyController.getPricingPolicy),
-);
 module.exports = router;

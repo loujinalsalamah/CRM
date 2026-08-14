@@ -447,5 +447,6 @@ model PropertyPricingPolicy {
   createdAt         DateTime     @default(now()) @map("created_at")
   updatedAt         DateTime     @updatedAt @map("updated_at")
 
+  @@unique([city, propertyType], name: "unique_city_property_type")
   @@map("property_pricing_policies")
 }
