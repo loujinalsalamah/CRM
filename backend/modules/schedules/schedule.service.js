@@ -1,9 +1,6 @@
 /* eslint-disable no-else-return */
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const AppError = require('../../utils/appError');
-const sanitizePersonalSchedule = require('../../utils/sanitizePersonalSchedule');
-const sanitizeRequestSchedule = require('../../utils/sanitizeRequestSchedule');
-const sanitizeDealSchedule = require('../../utils/sanitizeDealSchedule');
 
 class ScheduleService {
   constructor(scheduleRepository, notificationService) {
@@ -17,6 +14,7 @@ class ScheduleService {
       employeeId,
       date: new Date(data.date),
       acceptOn: null,
+      rejectOn: null,
     });
 
     if (schedule.type === 'REQUEST') {
@@ -27,7 +25,7 @@ class ScheduleService {
         entityType: 'SCHEDULE',
         entityId: schedule.id,
       });
-    } else if (schedule.type === 'DEAL') {
+    } else if (schedule.type === 'DEAL' && schedule.title === 'MEETING') {
       await this.notificationService.createNotification({
         title: 'Schedule Deal',
         body: `Schedule for deal in ${schedule.date}`,
@@ -36,46 +34,31 @@ class ScheduleService {
         entityId: schedule.id,
       });
     }
-
-    return schedule;
   }
 
-  async getSchedule(id) {
-    const schedule = await this.scheduleRepository.findScheduleById(id);
-    if (schedule.type === 'PERSONAL') {
-      return sanitizePersonalSchedule(schedule);
-    } else if (schedule.type === 'REQUEST') {
-      return sanitizeRequestSchedule(schedule);
-    } else if (schedule.type === 'DEAL') {
-      return sanitizeDealSchedule(schedule);
-    }
-    return schedule;
+  async getMySchedules(employeeId, queryString) {
+    return await this.scheduleRepository.findAllEmplyeeSchedules(
+      employeeId,
+      queryString,
+    );
   }
 
-  async updateSchedule(id, data) {
-    let schedule = await this.scheduleRepository.findScheduleById(id);
+  // async getDealSchedules(dealId, queryString) {
+  //   return await this.scheduleRepository.findAllDealSchedules(
+  //     dealId,
+  //     queryString,
+  //   );
+  // }
 
-    if (!schedule) {
-      return null;
-    }
-
-    schedule = await this.scheduleRepository.updateSchedule(id, data);
-
-    if (schedule.type === 'PERSONAL') {
-      return sanitizePersonalSchedule(schedule);
-    } else if (schedule.type === 'REQUEST') {
-      return sanitizeRequestSchedule(schedule);
-    } else if (schedule.type === 'DEAL') {
-      return sanitizeDealSchedule(schedule);
-    }
-    return schedule;
-  }
-
-  async deleteSchedule(id) {
+  async deleteSchedule(id, employeeId) {
     const schedule = await this.scheduleRepository.findScheduleById(id);
 
     if (!schedule) {
-      return null;
+      throw new AppError('Schedule not found', 404);
+    }
+
+    if (employeeId !== schedule.employeeId) {
+      throw new AppError('You are not authorized to delete this schedule', 403);
     }
 
     if (schedule.type !== 'PERSONAL') {
@@ -89,11 +72,14 @@ class ScheduleService {
     const schedule = await this.scheduleRepository.findScheduleById(id);
 
     if (!schedule) {
-      return null;
+      throw new AppError('Schedule not found', 404);
     }
 
-    if (schedule.type !== 'REQUEST') {
-      throw new AppError('Only request schedules can be accepted', 400);
+    if (schedule.type !== 'REQUEST' && schedule.type !== 'DEAL') {
+      throw new AppError(
+        'Only request and deal schedules can be accepted',
+        400,
+      );
     }
 
     if (schedule.acceptOn) {
@@ -108,18 +94,40 @@ class ScheduleService {
       acceptOn: new Date(),
     });
 
-    return sanitizeRequestSchedule(updatedSchedule);
+    if (updatedSchedule.type === 'REQUEST') {
+      await this.notificationService.createNotification({
+        title: 'Schedule Request',
+        body: `Schedule for request in ${schedule.date} is accepted`,
+        userId: schedule.employee.userId,
+        entityType: 'SCHEDULE',
+        entityId: schedule.id,
+      });
+    } else if (
+      updatedSchedule.type === 'DEAL' &&
+      updatedSchedule.title === 'MEETING'
+    ) {
+      await this.notificationService.createNotification({
+        title: 'Schedule Deal',
+        body: `Schedule for deal in ${schedule.date} is accepted`,
+        userId: schedule.employee.userId,
+        entityType: 'SCHEDULE',
+        entityId: schedule.id,
+      });
+    }
   }
 
   async rejectSchedule(id) {
     const schedule = await this.scheduleRepository.findScheduleById(id);
 
     if (!schedule) {
-      return null;
+      throw new AppError('Schedule not found', 404);
     }
 
-    if (schedule.type !== 'REQUEST') {
-      throw new AppError('Only request schedules can be rejected', 400);
+    if (schedule.type !== 'REQUEST' && schedule.type !== 'DEAL') {
+      throw new AppError(
+        'Only request and deal schedules can be rejected',
+        400,
+      );
     }
 
     if (schedule.rejectOn) {
@@ -134,53 +142,26 @@ class ScheduleService {
       rejectOn: new Date(),
     });
 
-    return sanitizeRequestSchedule(updatedSchedule);
-  }
-
-  async cancelSchedule(id, data) {
-    const schedule = await this.scheduleRepository.findScheduleById(id);
-
-    if (!schedule) {
-      return null;
+    if (updatedSchedule.type === 'REQUEST') {
+      await this.notificationService.createNotification({
+        title: 'Schedule Request',
+        body: `Schedule for request in ${schedule.date} is rejected`,
+        userId: schedule.employee.userId,
+        entityType: 'SCHEDULE',
+        entityId: schedule.id,
+      });
+    } else if (
+      updatedSchedule.type === 'DEAL' &&
+      updatedSchedule.title === 'MEETING'
+    ) {
+      await this.notificationService.createNotification({
+        title: 'Schedule Deal',
+        body: `Schedule for deal in ${schedule.date} is rejected`,
+        userId: schedule.employee.userId,
+        entityType: 'SCHEDULE',
+        entityId: schedule.id,
+      });
     }
-
-    if (schedule.canceledAt) {
-      throw new AppError('Schedule already canceled', 400);
-    }
-
-    if (schedule.completedAt) {
-      throw new AppError('Cannot cancel a completed schedule', 400);
-    }
-
-    const canceledSchedule = await this.scheduleRepository.updateSchedule(id, {
-      ...data,
-      canceledAt: new Date(),
-    });
-
-    return sanitizeRequestSchedule(canceledSchedule);
-  }
-
-  async completeSchedule(id, data) {
-    const schedule = await this.scheduleRepository.findScheduleById(id);
-
-    if (!schedule) {
-      return null;
-    }
-
-    if (schedule.completedAt) {
-      throw new AppError('Schedule already completed', 400);
-    }
-
-    if (schedule.canceledAt) {
-      throw new AppError('Cannot complete a canceled schedule', 400);
-    }
-
-    const completedSchedule = await this.scheduleRepository.updateSchedule(id, {
-      ...data,
-      completedAt: new Date(),
-    });
-
-    return sanitizeRequestSchedule(completedSchedule);
   }
 }
 

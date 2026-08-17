@@ -1,5 +1,7 @@
+const APIFeatures = require('../../utils/apiFeatures');
 /* eslint-disable no-else-return */
 /* eslint-disable node/no-unsupported-features/es-syntax */
+
 class ScheduleRepository {
   constructor(prisma) {
     this.prisma = prisma;
@@ -28,12 +30,90 @@ class ScheduleRepository {
           data: { status: 'IN_PROGRESS' },
         });
       }
+      // else if (schedule.type === 'DEAL' && schedule.title === 'MEETING') {
+      //   await tx.deal.update({
+      //     where: { id: schedule.dealId },
+      //     data: { status: '' },
+      //   });
+      // }
       return schedule;
     });
   }
 
+  // findAllDealSchedules(dealId, queryString) {
+  //   let features = new APIFeatures(queryString);
+
+  //   features = features.sort();
+
+  //   features.options.where.dealId = dealId;
+
+  //   features.options.select = {
+  //     id: true,
+  //     type: true,
+  //     date: true,
+  //     title: true,
+  //     description: true,
+  //     rejectOn: true,
+  //     acceptOn: true,
+  //     // deal: {
+  //     //   select: {
+  //     //     id: true,
+  //     //     title: true,
+  //     //   },
+  //     // },
+  //   };
+
+  //   return this.prisma.schedule.findMany(features.options);
+  // }
+
+  findAllEmplyeeSchedules(employeeId, queryString) {
+    let features = new APIFeatures(queryString);
+
+    features = features.filter();
+    features = features.sort();
+
+    features.options.where.employeeId = employeeId;
+
+    features.options.select = {
+      id: true,
+      type: true,
+      date: true,
+      title: true,
+      description: true,
+      rejectOn: true,
+      acceptOn: true,
+      request: {
+        select: {
+          id: true,
+        },
+      },
+      // deal: {
+      //   select: {
+      //     id: true,
+      //     title: true,
+      //   },
+      // },
+    };
+
+    return this.prisma.schedule.findMany(features.options);
+  }
+
   findScheduleById(id) {
-    return this.prisma.schedule.findUnique({ where: { id } });
+    return this.prisma.schedule.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        employeeId: true,
+        date: true,
+        type: true,
+        title: true,
+        employee: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
   }
 
   updateSchedule(id, data) {

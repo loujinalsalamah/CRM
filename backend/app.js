@@ -14,6 +14,7 @@ const scheduleRoutes = require('./modules/schedules/schedule.routes');
 const employeeRoutes = require('./modules/employees/employee.routes');
 const clientRoutes = require('./modules/clients/client.routes');
 const complaintRoutes = require('./modules/complaints/complaint.routes');
+const dealRoutes = require('./modules/deals/deal.routes');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use('/api/v1/schedules', scheduleRoutes);
 app.use('/api/v1/employees', employeeRoutes);
 app.use('/api/v1/clients', clientRoutes);
 app.use('/api/v1/complaints', complaintRoutes);
+app.use('/api/v1/deals', dealRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({

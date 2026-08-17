@@ -202,8 +202,8 @@ model Employee {
   photo                       String?
   productivity                Float                        @default(0.0)
   averageResponseTime         Float                        @default(0.0) @map("average_response_time")
-  preferredPropertyType       PropertyType                 @map("preferred_property_type")
-  preferredLocation           String                       @map("preferred_location")
+  preferredPropertyType       PropertyType?                @map("preferred_property_type")
+  preferredLocation           String?                      @map("preferred_location")
   salary                      Decimal                      @db.Decimal(10, 2)
   createdAt                   DateTime                     @default(now()) @map("created_at")
   updatedAt                   DateTime                     @updatedAt @map("updated_at")
@@ -247,10 +247,6 @@ model Schedule {
   description   String?
   rejectOn      DateTime?      @map("rejected_on")
   acceptOn      DateTime?      @map("accept_on")
-  canceledAt    DateTime?      @map("canceled_at")
-  cancelReason  String?        @map("cancel_reason")
-  completedAt   DateTime?      @map("completed_at")
-  completeNote  String?        @map("complete_note")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
   employeeId    String         @map("employee_id")
@@ -500,6 +496,7 @@ model Notification {
 
 enum entityType {
   SCHEDULE
+  COMPLAINT
 }
 
 model Presence {

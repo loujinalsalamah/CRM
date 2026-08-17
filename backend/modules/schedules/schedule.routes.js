@@ -8,9 +8,6 @@ const restrictTo = require('../../middlewares/restrictTo');
 const {
   createScheduleSchema,
   scheduleIdSchema,
-  updateScheduleSchema,
-  cancelScheduleSchema,
-  completeScheduleSchema,
 } = require('./schedule.validation');
 
 const prisma = require('../../db');
@@ -29,7 +26,24 @@ const scheduleService = new ScheduleService(
 );
 const scheduleController = new ScheduleController(scheduleService);
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
+
+router.get(
+  '/',
+  catchAsync(protect),
+  restrictTo('EMPLOYEE'),
+  (req, res, next) => {
+    if (req.params.id) return next();
+    return scheduleController.getMySchedules(req, res, next);
+  },
+);
+
+// router.get(
+//   '/',
+//   catchAsync(protect),
+//   restrictTo('EMPLOYEE'),
+//   catchAsync(scheduleController.getDealSchedules),
+// );
 
 router.post(
   '/',
@@ -38,21 +52,6 @@ router.post(
   validate({ body: createScheduleSchema }),
   catchAsync(scheduleController.createSchedule),
 );
-
-router.get(
-  '/:id',
-  catchAsync(protect),
-  restrictTo('EMPLOYEE'),
-  validate({ params: scheduleIdSchema }),
-  catchAsync(scheduleController.getSchedule),
-);
-
-router.patch(
-  '/:id',
-  validate({ params: scheduleIdSchema, body: updateScheduleSchema }),
-  catchAsync(scheduleController.updateSchedule),
-);
-
 router.delete(
   '/:id',
   catchAsync(protect),
@@ -75,22 +74,6 @@ router.patch(
   restrictTo('CLIENT'),
   validate({ params: scheduleIdSchema }),
   catchAsync(scheduleController.rejectSchedule),
-);
-
-router.patch(
-  '/:id/cancel',
-  catchAsync(protect),
-  restrictTo('EMPLOYEE'),
-  validate({ params: scheduleIdSchema, body: cancelScheduleSchema }),
-  catchAsync(scheduleController.cancelSchedule),
-);
-
-router.patch(
-  '/:id/complete',
-  catchAsync(protect),
-  restrictTo('EMPLOYEE'),
-  validate({ params: scheduleIdSchema, body: completeScheduleSchema }),
-  catchAsync(scheduleController.completeSchedule),
 );
 
 module.exports = router;

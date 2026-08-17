@@ -36,24 +36,7 @@ const scheduleIdSchema = z.object({
   id: z.string().uuid(),
 });
 
-const updateScheduleSchema = z.object({
-  date: z.string().datetime().optional(),
-  title: z.string().min(3).optional(),
-  description: z.string().optional(),
-});
-
-const cancelScheduleSchema = z.object({
-  cancelReason: z.string().optional(),
-});
-
-const completeScheduleSchema = z.object({
-  completeNote: z.string().optional(),
-});
-
 module.exports = {
   createScheduleSchema,
   scheduleIdSchema,
-  updateScheduleSchema,
-  cancelScheduleSchema,
-  completeScheduleSchema,
 };
