@@ -18,11 +18,138 @@ model VisitorSession {
   createdAt     DateTime       @default(now()) @map("created_at")
   lastActiveAt  DateTime       @updatedAt @map("last_active_at")
   deviceInfo    String?        @map("device_info")
+  islead        Boolean        @default(false) @map("is_lead")
   ip            String?
   clients       Client[]
   notifications Notification[]
+  lead          Lead?
 
   @@map("visitor_sessions")
+}
+
+model Lead {
+  id                      String                   @id @default(uuid())
+  budget                  Float
+  source                  String
+  createdAt               DateTime                 @default(now()) @map("created_at")
+  updatedAt               DateTime                 @updatedAt @map("updated_at")
+  visitorSessionId        String                   @unique @map("visitor_session_id")
+  visitorSession          VisitorSession           @relation(fields: [visitorSessionId], references: [id])
+  clients                 Client[]
+  leadBehaviors           LeadBehavior[]
+  propertyLeads           PropertyLead[]
+  leadSegmentations       LeadSegmentation[]
+  leadRecomendations      LeadRecomendation[]
+  leadRecomendationCaches LeadRecomendationCache[]
+
+  @@map("leads")
+}
+
+enum LeadEventType {
+  VIEW
+  LIKE
+  SHARE
+  Notification
+}
+
+model LeadBehavior {
+  id         String        @id @default(uuid())
+  eventType  LeadEventType @map("event_type")
+  propertyId String        @map("property_id")
+  property   Property      @relation(fields: [propertyId], references: [id])
+  dwellTime  Int           @map("dwell_time")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  leadId     String        @map("lead_id")
+  lead       Lead          @relation(fields: [leadId], references: [id])
+
+  @@map("lead_behaviors")
+}
+
+enum UrgencyLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model PropertyLead {
+  id                    String        @id @default(uuid())
+  propertyId            String?       @map("property_id")
+  leadId                String        @map("lead_id")
+  property              Property?     @relation(fields: [propertyId], references: [id])
+  lead                  Lead          @relation(fields: [leadId], references: [id])
+  priceGap              Float?        @map("price_gap")
+  engagementScore       Float?        @map("engagement_score")
+  conversionProbability Float?        @map("conversion_probability")
+  conversionStatus      String?       @map("conversion_status")
+  urgencyLevel          UrgencyLevel? @map("urgency_level")
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+  leadRevenues          LeadRevenue[]
+
+  @@unique([propertyId, leadId], name: "unique_property_lead")
+  @@map("property_leads")
+}
+
+enum SegmentationType {
+  CASUAL_BROWSER
+  SERIOUS_BUYER
+  HOT_BUYER
+}
+
+model LeadSegmentation {
+  id      String           @id @default(uuid())
+  leadId  String           @map("lead_id")
+  lead    Lead             @relation(fields: [leadId], references: [id])
+  segment SegmentationType
+}
+
+model LeadRecomendation {
+  id         String   @id @default(uuid())
+  leadId     String   @map("lead_id")
+  lead       Lead     @relation(fields: [leadId], references: [id])
+  propertyId String   @map("property_id")
+  property   Property @relation(fields: [propertyId], references: [id])
+  score      Float    @map("score")
+  reason     String   @map("reason")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("lead_recommendations")
+}
+
+model LeadRecomendationCache {
+  id         String   @id @default(uuid())
+  leadId     String   @map("lead_id")
+  lead       Lead     @relation(fields: [leadId], references: [id])
+  propertyId String   @map("property_id")
+  property   Property @relation(fields: [propertyId], references: [id])
+  score      Float    @map("score")
+  reason     String   @map("reason")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("lead_recommendations_cache")
+}
+
+model LeadRevenue {
+  id              String       @id @default(uuid())
+  propertyLeadId  String       @map("property_lead_id")
+  propertyLead    PropertyLead @relation(fields: [propertyLeadId], references: [id])
+  expectedRevenue Float        @map("expected_revenue")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  @@map("revenue_leads")
+}
+
+model SaleForcast {
+  id                       String   @id @default(uuid())
+  month                    DateTime
+  predictedLeads           Int      @map("predicted_leads")
+  predictedConversionsRate Float    @map("predicted_conversions_rate")
+  predictedConversions     Int      @map("predicted_conversions")
+  predictedRevenue         Float    @map("predicted_revenue")
+
+  @@map("sales_forecast")
 }
 
 model User {
@@ -50,6 +177,7 @@ model User {
   ownedRooms                Room[]         @relation("RoomOwner")
   roomMembers               RoomMember[]
   messages                  Message[]
+  complaints                Complaint[]
 
   @@map("users")
 }
@@ -65,32 +193,48 @@ enum SignupMethod {
 }
 
 model Employee {
-  id                  String       @id @default(uuid())
-  name                String
-  role                EmployeeRole @default(SALES)
-  fullName            String
-  location            String
-  phone               String
-  photo               String?
-  productivity        Float        @default(0.0)
-  averageResponseTime Float        @default(0.0)
-  salary              Decimal      @db.Decimal(10, 2)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-  userId              String       @unique @map("user_id")
-  user                User         @relation(fields: [userId], references: [id])
-  schedules           Schedule[]
-  requests            Request[]
-  deals               Deal[]
+  id                          String                       @id @default(uuid())
+  name                        String
+  role                        EmployeeRole                 @default(SALES)
+  fullName                    String                       @map("full_name")
+  location                    String
+  phone                       String
+  photo                       String?
+  productivity                Float                        @default(0.0)
+  averageResponseTime         Float                        @default(0.0) @map("average_response_time")
+  preferredPropertyType       PropertyType                 @map("preferred_property_type")
+  preferredLocation           String                       @map("preferred_location")
+  salary                      Decimal                      @db.Decimal(10, 2)
+  createdAt                   DateTime                     @default(now()) @map("created_at")
+  updatedAt                   DateTime                     @updatedAt @map("updated_at")
+  userId                      String                       @unique @map("user_id")
+  user                        User                         @relation(fields: [userId], references: [id])
+  schedules                   Schedule[]
+  requests                    Request[]
+  employeeDealRecommendations employeeDealRecommendation[]
 
   @@map("employees")
+}
+
+model employeeDealRecommendation {
+  id         String   @id @default(uuid())
+  employeeId String   @map("employee_id")
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  // dealId
+  score      Float
+  rank       Int
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("employee_deal_recommendations")
 }
 
 enum EmployeeRole {
   SALES
   PURCHASING
   RENTAL
+  LEASE
   CONSULTANT
+  SUPPORT
   SALES_MANAGER
   GENERAL_MANAGER
 }
@@ -142,11 +286,12 @@ model Client {
   favoritePropertyIds    String[]
   visitorSessionId       String?         @map("visitor_session_id")
   visitorSession         VisitorSession? @relation(fields: [visitorSessionId], references: [id])
+  leadId                 String?         @map("lead_id")
+  lead                   Lead?           @relation(fields: [leadId], references: [id])
   userId                 String          @unique
   user                   User            @relation(fields: [userId], references: [id])
   requests               Request[]
   properties             Property[]
-  deals                  Deal[]
 
   @@map("clients")
 }
@@ -187,66 +332,74 @@ enum RequestStatus {
 }
 
 model Property {
-  id                 String         @id @default(uuid())
-  clientId           String         @map("client_id")
-  client             Client         @relation(fields: [clientId], references: [id])
+  id                      String                   @id @default(uuid())
+  clientId                String                   @map("client_id")
+  client                  Client                   @relation(fields: [clientId], references: [id])
   //CODE
-  referenceCode      String?        @unique @map("reference_code")
-  zipCode            Float          @map("zip_code")
+  referenceCode           String?                  @unique @map("reference_code")
+  zipCode                 Float                    @map("zip_code")
   // TYPE
-  type               PropertyType
-  listingType        ListingType    @map("listing_type")
+  type                    PropertyType
+  listingType             ListingType              @map("listing_type")
   // DESCRIPTION
-  simpleDescription  String?        @map("simple_description")
-  fullDescription    String?        @map("full_description")
+  simpleDescription       String?                  @map("simple_description")
+  fullDescription         String?                  @map("full_description")
   // LOCATION
-  location           String         @map("location")
-  city               String
-  address            String?
-  latitude           Float?
-  longitude          Float?
+  location                String                   @map("location")
+  city                    String
+  address                 String?
+  latitude                Float?
+  longitude               Float?
   // PRICING
-  rentalPeriod       Int?           @map("rental_period")
-  listedPrice        Float?         @map("listed_price")
+  rentalPeriod            Int?                     @map("rental_period")
+  listedPrice             Float?                   @map("listed_price")
   // AREA
-  sqft               Float
+  sqft                    Float
   // ROOMS
-  roomItems          RoomItem[]
-  numOfRooms         Int?           @map("num_of_rooms")
-  bathrooms          Float?         @map("bathrooms")
+  roomItems               RoomItem[]
+  numOfRooms              Int?                     @map("num_of_rooms")
+  bathrooms               Float?                   @map("bathrooms")
   // FEATURES FOR ALL
-  heating            Status         @default(NOT_AVAILABLE)
-  furnishing         FurnishingType @default(UNFURNISHED)
+  heating                 Status                   @default(NOT_AVAILABLE)
+  furnishing              FurnishingType           @default(UNFURNISHED)
+  garageCars              Float?                   @map("garage_cars")
   // FEATURES :HOUSE , VILLA
-  numOfFloors        Int?           @map("num_of_floors")
+  numOfFloors             Int?                     @map("num_of_floors")
   // FEATURES :APARTMENT, HALL, STORE
-  floorNumber        Int?           @map("floor_number")
-  elevator           Boolean?       @default(false)
-  parking            Status         @default(NOT_AVAILABLE) @map("parking")
+  floorNumber             Int?                     @map("floor_number")
+  elevator                Boolean?                 @default(false)
+  parking                 Status                   @default(NOT_AVAILABLE) @map("parking")
   // EXTRA FEATURES
-  fireplace          Boolean?       @default(false)
-  hasBasement        Boolean?       @default(false)
-  basementArea       Float?         @map("basement_area")
-  internalGarageArea Float?         @map("internal_garage_area")
+  fireplace               Boolean?                 @default(false)
+  hasBasement             Boolean?                 @default(false)
+  basementArea            Float?                   @map("basement_area")
+  internalGarageArea      Float?                   @map("internal_garage_area")
   // IMAGES
-  primaryPhoto       String         @map("primary_photo")
-  galleryPhoto       Json           @map("gallery_photo")
+  primaryPhoto            String                   @map("primary_photo")
+  galleryPhoto            Json                     @map("gallery_photo")
   // NEARBY AMENITIES
-  nearbyPlaces       Json?          @map("nearby_places")
+  nearbyPlaces            Json?                    @map("nearby_places")
   // QUALITY & FINISHING 1–5
-  finishingQuality   Int            @map("finishing_quality")
-  maintenanceLevel   Int            @map("maintenance_level")
-  neighborhoodScore  Float          @map("neighborhood_score")
-  exteriorFinish     Int            @map("exterior_finish")
+  finishingQuality        Int                      @map("finishing_quality")
+  maintenanceLevel        Int                      @map("maintenance_level")
+  neighborhoodScore       Float                    @map("neighborhood_score")
+  exteriorFinish          Int                      @map("exterior_finish")
+  overAllQual             Int                      @map("overall_qual")
+  overAllcond             Int                      @map("overall_cond")
   // YEAR
-  constructionYear   Int            @map("construction_year")
+  constructionYear        Int                      @map("construction_year")
+  listingDate             DateTime                 @map("listing_date")
   // OUTDOOR ITEMS
-  outdoorItems       OutdoorItem[]
+  outdoorItems            OutdoorItem[]
   // STATUS
-  status             Status         @default(NOT_AVAILABLE)
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  requests           Request[]
+  status                  Status                   @default(NOT_AVAILABLE)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  requests                Request[]
+  leadBehaviors           LeadBehavior[]
+  propertyLeads           PropertyLead[]
+  leadRecomendations      LeadRecomendation[]
+  leadRecomendationCaches LeadRecomendationCache[]
 
   @@map("properties")
 }
@@ -349,17 +502,6 @@ enum entityType {
   SCHEDULE
 }
 
-model Deal {
-  id         String    @id @default(uuid())
-  clientId   String
-  client     Client    @relation(fields: [clientId], references: [id])
-  employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id])
-  room       Room?
-
-  @@map("deals")
-}
-
 model Presence {
   id        String         @id @default(uuid())
   status    PresenceStatus @default(OFFLINE)
@@ -384,8 +526,6 @@ model Room {
   type          RoomCategory
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
-  dealId        String?      @unique @map("deal_id")
-  deal          Deal?        @relation(fields: [dealId], references: [id])
   ownerId       String?
   owner         User?        @relation("RoomOwner", fields: [ownerId], references: [id])
   lastMessageId String?      @unique
@@ -449,4 +589,49 @@ model PropertyPricingPolicy {
 
   @@unique([city, propertyType], name: "unique_city_property_type")
   @@map("property_pricing_policies")
+}
+
+enum ComplaintStatus {
+  PENDING
+  RESOLVED
+}
+
+enum ComplaintSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model ComplaintType {
+  id                String            @id @default(uuid())
+  name              String            @unique
+  code              String            @unique
+  severity          ComplaintSeverity
+  maxResponseTime   Int
+  maxResolutionTime Int
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  complaints        Complaint[]
+
+  @@map("complaint_types")
+}
+
+model Complaint {
+  id                  String          @id @default(uuid())
+  status              ComplaintStatus @default(PENDING)
+  issueMessage        String          @map("issue_message")
+  replyMessage        String?         @map("reply_message")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+  repliedAt           DateTime?       @map("replied_at")
+  resolvedAt          DateTime?       @map("resolved_at")
+  isResponseOverdue   Boolean         @default(false) @map("is_response_overdue")
+  isResolutionOverdue Boolean         @default(false) @map("is_resolution_overdue")
+  userId              String          @map("user_id")
+  user                User            @relation(fields: [userId], references: [id])
+  complaintTypeId     String          @map("complaint_type_id")
+  complaintType       ComplaintType   @relation(fields: [complaintTypeId], references: [id])
+
+  @@map("complaints")
 }

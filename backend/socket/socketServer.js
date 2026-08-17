@@ -1,5 +1,3 @@
-// socket/socketServer.js
-
 const { Server } = require('socket.io');
 
 function createSocketServer(server) {
