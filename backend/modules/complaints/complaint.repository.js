@@ -102,11 +102,58 @@ class ComplaintRepository {
     });
   }
 
-  // updateComplaint(data, id) {
-  //   return this.prisma.complaint.update({
-  //     where: { id },
-  //     data,
-  //   });
-  // }
+  updateComplaint(id, data) {
+    return this.prisma.complaint.update({
+      where: { id },
+      data,
+    });
+  }
+
+  findPendingUnrepliedComplaints() {
+    return this.prisma.complaint.findMany({
+      where: {
+        status: 'PENDING',
+        repliedAt: null,
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        isResponseOverdue: true,
+        complaintType: {
+          select: {
+            maxResponseTime: true,
+          },
+        },
+      },
+    });
+  }
+
+  findPendingComplaintsForResolutionCheck() {
+    return this.prisma.complaint.findMany({
+      where: {
+        status: 'PENDING',
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        isResolutionOverdue: true,
+        complaintType: {
+          select: {
+            maxResolutionTime: true,
+          },
+        },
+      },
+    });
+  }
+
+  getAllComplaintTypes() {
+    return this.prisma.complaintType.findMany({
+      select: {
+        id: true,
+        name: true,
+        code: true,
+      },
+    });
+  }
 }
 module.exports = ComplaintRepository;

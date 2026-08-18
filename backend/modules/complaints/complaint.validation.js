@@ -9,8 +9,12 @@ const complaintIdSchema = z.object({
   id: z.string().uuid('Complaint ID must be a valid UUID'),
 });
 
+const replyComplaintSchema = z.object({
+  replyMessage: z.string().min(1, 'Reply message is required'),
+});
+
 module.exports = {
   createComplaintSchema,
   complaintIdSchema,
-  // replyComplaintSchema,
+  replyComplaintSchema,
 };

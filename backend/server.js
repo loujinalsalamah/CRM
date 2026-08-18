@@ -4,6 +4,12 @@ const prisma = require('./db');
 const createSocketServer = require('./socket/socketServer');
 const notificationSocket = require('./socket/notificationSocket');
 const { setIo } = require('./socket/io');
+const ComplaintCron = require('./modules/complaints/complaint.cron');
+
+const ComplaintRepository = require('./modules/complaints/complaint.repository');
+const NotificationRepository = require('./modules/notifications/notification.repository');
+const NotificationService = require('./modules/notifications/notification.service');
+const EmployeeRepository = require('./modules/employees/employee.repository');
 
 dotenv.config({ path: './config.env' });
 
@@ -11,6 +17,7 @@ const AIService = require('./modules/ai/ai.service');
 const aiService = new AIService();
 
 const app = require('./app');
+const notificationRepository = require('./modules/notifications/notification.repository');
 
 async function connection() {
   try {
@@ -37,6 +44,15 @@ notificationSocket(io);
 server.listen(port, '0.0.0.0', () => {
   console.log(`App running on port ${port}...`);
 });
+
+const complaintCron = new ComplaintCron(
+  new ComplaintRepository(prisma),
+  new NotificationService(new NotificationRepository(prisma)),
+  new EmployeeRepository(prisma),
+);
+
+complaintCron.initResponseCheckCron();
+complaintCron.initResolutionCheckCron();
 
 // async function runAIRecommendation() {
 //   try {

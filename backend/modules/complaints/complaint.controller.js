@@ -1,6 +1,12 @@
 class ComplaintController {
   constructor(complaintService) {
     this.complaintService = complaintService;
+    this.getAllComplaints = this.getAllComplaints.bind(this);
+    this.createComplaint = this.createComplaint.bind(this);
+    this.getComplaintById = this.getComplaintById.bind(this);
+    this.replyToComplaint = this.replyToComplaint.bind(this);
+    this.resolveToComplaint = this.resolveToComplaint.bind(this);
+    this.getAllComplaintTypes = this.getAllComplaintTypes.bind(this);
   }
 
   async createComplaint(req, res, next) {
@@ -39,29 +45,39 @@ class ComplaintController {
     });
   }
 
-  // async replyToComplaint(req, res, next) {
-  //   const { id } = req.user.id;
-  //   const data = req.body;
+  async replyToComplaint(req, res, next) {
+    const { id } = req.params;
+    const data = req.body;
 
-  //   await this.complaintService.replyToComplaint(data, id);
+    await this.complaintService.replyToComplaint(id, data);
 
-  //   res.status(200).json({
-  //     status: 'success',
-  //     message: 'Reply submitted successfully',
-  //   });
-  // }
+    res.status(200).json({
+      status: 'success',
+      message: 'Reply submitted successfully',
+    });
+  }
 
-  // async resolveToComplaint(req, res, next) {
-  //   const { id } = req.user.id;
-  //   const data = req.body;
+  async resolveToComplaint(req, res, next) {
+    const { id } = req.params;
+    const data = req.body;
 
-  //   await this.complaintService.resolveToComplaint(data, id);
+    await this.complaintService.resolveToComplaint(id, data);
 
-  //   res.status(200).json({
-  //     status: 'success',
-  //     message: 'Resolve submitted successfully',
-  //   });
-  // }
+    res.status(200).json({
+      status: 'success',
+      message: 'Resolve submitted successfully',
+    });
+  }
+
+  async getAllComplaintTypes(req, res, next) {
+    const complaintTypes = await this.complaintService.getAllComplaintTypes();
+
+    res.status(200).json({
+      status: 'success',
+      results: complaintTypes.length,
+      data: complaintTypes,
+    });
+  }
 }
 
 module.exports = ComplaintController;

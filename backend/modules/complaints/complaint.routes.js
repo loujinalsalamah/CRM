@@ -15,11 +15,25 @@ const ComplaintRepository = require('./complaint.repository');
 const ComplaintService = require('./complaint.service');
 const ComplaintController = require('./complaint.controller');
 
+const NotificationRepository = require('../notifications/notification.repository');
+const NotificationService = require('../notifications/notification.service');
+
+const notificationRepository = new NotificationRepository(prisma);
+const notificationService = new NotificationService(notificationRepository);
+
 const complaintRepository = new ComplaintRepository(prisma);
-const complaintService = new ComplaintService(complaintRepository);
+const complaintService = new ComplaintService(
+  complaintRepository,
+  notificationService,
+);
 const complaintController = new ComplaintController(complaintService);
 
 const router = express.Router();
+
+router.get(
+  '/complaintTypes',
+  catchAsync(complaintController.getAllComplaintTypes),
+);
 
 router.post(
   '/',
@@ -44,20 +58,20 @@ router.get(
   catchAsync(complaintController.getComplaintById),
 );
 
-// router.patch(
-//   '/:id/reply',
-//   catchAsync(protect),
-//   restrictTo('SUPPORT'),
-//   validate({ params: complaintIdSchema }),
-//   catchAsync(complaintController.replyToComplaint),
-// );
+router.patch(
+  '/:id/reply',
+  catchAsync(protect),
+  restrictTo('SUPPORT'),
+  validate({ params: complaintIdSchema }),
+  catchAsync(complaintController.replyToComplaint),
+);
 
-// router.patch(
-//   '/:id/resolve',
-//   catchAsync(protect),
-//   restrictTo('SUPPORT'),
-//   validate({ params: complaintIdSchema }),
-//   catchAsync(complaintController.resolveToComplaint),
-// );
+router.patch(
+  '/:id/resolve',
+  catchAsync(protect),
+  restrictTo('SUPPORT'),
+  validate({ params: complaintIdSchema }),
+  catchAsync(complaintController.resolveToComplaint),
+);
 
 module.exports = router;

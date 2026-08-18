@@ -70,6 +70,4 @@ router.get(
   catchAsync(propertyController.getProperty),
 );
 
-//
-
 module.exports = router;

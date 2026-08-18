@@ -240,20 +240,19 @@ enum EmployeeRole {
 }
 
 model Schedule {
-  id            String         @id @default(uuid())
-  type          ScheduleType
-  date          DateTime
-  title         String
-  description   String?
-  rejectOn      DateTime?      @map("rejected_on")
-  acceptOn      DateTime?      @map("accept_on")
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @updatedAt @map("updated_at")
-  employeeId    String         @map("employee_id")
-  employee      Employee       @relation(fields: [employeeId], references: [id])
-  requestId     String?        @map("request_id")
-  request       Request?       @relation(fields: [requestId], references: [id])
-  notifications Notification[]
+  id          String       @id @default(uuid())
+  type        ScheduleType
+  date        DateTime
+  title       String
+  description String?
+  rejectOn    DateTime?    @map("rejected_on")
+  acceptOn    DateTime?    @map("accept_on")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  employeeId  String       @map("employee_id")
+  employee    Employee     @relation(fields: [employeeId], references: [id])
+  requestId   String?      @map("request_id")
+  request     Request?     @relation(fields: [requestId], references: [id])
 
   // deal
   @@map("schedules")
@@ -489,7 +488,6 @@ model Notification {
   entityId         String?         @map("entity_id")
   user             User?           @relation(fields: [userId], references: [id])
   visitorSession   VisitorSession? @relation(fields: [visitorSessionId], references: [id])
-  schedule         Schedule?       @relation(fields: [entityId], references: [id])
 
   @@map("user_notifications")
 }

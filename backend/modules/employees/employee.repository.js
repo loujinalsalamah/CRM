@@ -81,6 +81,10 @@ class EmployeeRepository {
       },
     });
   }
+
+  findByRole(role) {
+    return this.prisma.employee.findFirst({ where: { role } });
+  }
 }
 
 module.exports = EmployeeRepository;

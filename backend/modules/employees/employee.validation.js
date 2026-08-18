@@ -7,6 +7,7 @@ const EmployeeRoleEnum = z.enum([
   'CONSULTANT',
   'SALES_MANAGER',
   'GENERAL_MANAGER',
+  'SUPPORT',
 ]);
 
 const createEmployeeSchema = z.object({
