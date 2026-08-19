@@ -17,7 +17,7 @@ model VisitorSession {
   id            String         @id @default(uuid())
   createdAt     DateTime       @default(now()) @map("created_at")
   lastActiveAt  DateTime       @updatedAt @map("last_active_at")
-  deviceInfo    String?        @map("device_info")
+  deviceInfo    String?        @map("device_info") // cancel
   islead        Boolean        @default(false) @map("is_lead")
   ip            String?
   clients       Client[]

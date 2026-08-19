@@ -32,18 +32,17 @@ router.get(
   '/',
   catchAsync(protect),
   restrictTo('EMPLOYEE'),
-  (req, res, next) => {
-    if (req.params.id) return next();
-    return scheduleController.getMySchedules(req, res, next);
-  },
-);
+  catchAsync(async (req, res, next) => {
+    if (req.params.requestId) {
+      return scheduleController.getRequestSchedules(req, res, next);
+    }
+    if (req.params.dealId) {
+      return scheduleController.getDealSchedules(req, res, next);
+    }
 
-// router.get(
-//   '/',
-//   catchAsync(protect),
-//   restrictTo('EMPLOYEE'),
-//   catchAsync(scheduleController.getDealSchedules),
-// );
+    return scheduleController.getMySchedules(req, res, next);
+  }),
+);
 
 router.post(
   '/',

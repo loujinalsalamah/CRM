@@ -6,6 +6,8 @@ const restrictTo = require('../../middlewares/restrictTo');
 const validate = require('../../middlewares/validate');
 const prisma = require('../../db');
 
+const scheduleRoutes = require('../schedules/schedule.routes');
+
 const {
   sellRequestSchema,
   buyRequestSchema,
@@ -33,6 +35,14 @@ const requestService = new RequestService(
 const requestController = new RequestController(requestService);
 
 const router = express.Router({ mergeParams: true });
+
+router.use(
+  '/:requestId/schedules',
+  catchAsync(protect),
+  restrictTo('CONSULTANT'),
+  validate({ params: requestIdSchema }),
+  scheduleRoutes,
+);
 
 router.post(
   '/sellRequest',

@@ -9,11 +9,11 @@ const scheduleRoutes = require('../schedules/schedule.routes');
 
 const router = express.Router();
 
-router.get(
-  '/:id/schedules',
+router.use(
+  '/:dealId/schedules',
   catchAsync(protect),
   restrictTo('EMPLOYEE'),
-  //   validate({ params: dealIdSchema }),
+  // validate({ params: dealIdSchema }),
   scheduleRoutes,
 );
 

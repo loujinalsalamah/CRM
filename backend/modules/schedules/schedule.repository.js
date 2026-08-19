@@ -66,6 +66,26 @@ class ScheduleRepository {
   //   return this.prisma.schedule.findMany(features.options);
   // }
 
+  findAllRequestSchedules(requestId) {
+    return this.prisma.schedule.findMany({
+      where: { requestId },
+      select: {
+        id: true,
+        type: true,
+        date: true,
+        title: true,
+        description: true,
+        rejectOn: true,
+        acceptOn: true,
+        request: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+  }
+
   findAllEmplyeeSchedules(employeeId, queryString) {
     let features = new APIFeatures(queryString);
 

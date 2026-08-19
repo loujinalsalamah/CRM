@@ -38,7 +38,7 @@ class ScheduleController {
   }
 
   // async getDealSchedules(req, res, next) {
-  //   const dealId = req.params.id;
+  //   const dealId = req.params.dealId;
   //   const queryString = req.query;
 
   //   const schedules = await this.scheduleService.getDealSchedules(
@@ -52,6 +52,18 @@ class ScheduleController {
   //     data: schedules,
   //   });
   // }
+
+  async getRequestSchedules(req, res, next) {
+    const { requestId } = req.params;
+
+    const schedules = await this.scheduleService.getRequestSchedules(requestId);
+
+    res.status(200).json({
+      status: 'success',
+      results: schedules.length,
+      data: schedules,
+    });
+  }
 
   async deleteSchedule(req, res, next) {
     const { id } = req.params;

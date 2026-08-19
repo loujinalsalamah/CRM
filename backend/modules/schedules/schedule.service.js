@@ -50,6 +50,10 @@ class ScheduleService {
   //   );
   // }
 
+  async getRequestSchedules(requestId) {
+    return await this.scheduleRepository.findAllRequestSchedules(requestId);
+  }
+
   async deleteSchedule(id, employeeId) {
     const schedule = await this.scheduleRepository.findScheduleById(id);
 
