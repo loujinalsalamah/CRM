@@ -48,7 +48,7 @@ const createPropertySchema = z.object({
   buildingNumber: z.string(),
   overAllQual: z.number().int().min(1).max(20),
   overAllcond: z.number().int().min(1).max(20),
-
+  garageCars: z.number().optional(),
   numOfFloors: z.number().int().optional(),
   floorNumber: z.number().int().optional(),
   elevator: z.boolean().optional(),
