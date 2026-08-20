@@ -8,6 +8,7 @@ const restrictTo = require('../../middlewares/restrictTo');
 const {
   createScheduleSchema,
   scheduleIdSchema,
+  changeScheduleSchema,
 } = require('./schedule.validation');
 
 const prisma = require('../../db');
@@ -51,12 +52,21 @@ router.post(
   validate({ body: createScheduleSchema }),
   catchAsync(scheduleController.createSchedule),
 );
+
 router.delete(
   '/:id',
   catchAsync(protect),
   restrictTo('EMPLOYEE'),
   validate({ params: scheduleIdSchema }),
   catchAsync(scheduleController.deleteSchedule),
+);
+
+router.patch(
+  '/:id/change',
+  catchAsync(protect),
+  restrictTo('EMPLOYEE'),
+  validate({ params: scheduleIdSchema, body: changeScheduleSchema }),
+  catchAsync(scheduleController.changeSchedule),
 );
 
 router.patch(

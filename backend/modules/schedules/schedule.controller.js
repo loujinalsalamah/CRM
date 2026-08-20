@@ -7,6 +7,7 @@ class ScheduleController {
     this.deleteSchedule = this.deleteSchedule.bind(this);
     this.acceptSchedule = this.acceptSchedule.bind(this);
     this.rejectSchedule = this.rejectSchedule.bind(this);
+    this.changeSchedule = this.changeSchedule.bind(this);
   }
 
   async createSchedule(req, res, next) {
@@ -74,6 +75,19 @@ class ScheduleController {
     res.status(204).json({
       status: 'success',
       message: 'Schedule deleted successfully',
+    });
+  }
+
+  async changeSchedule(req, res, next) {
+    const { id } = req.params;
+    const employeeId = req.user.employee.id;
+    const data = req.body;
+
+    await this.scheduleService.changeSchedule(id, employeeId, data);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Schedule changed successfully',
     });
   }
 

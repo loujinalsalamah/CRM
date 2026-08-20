@@ -36,7 +36,12 @@ const scheduleIdSchema = z.object({
   id: z.string().uuid(),
 });
 
+const changeScheduleSchema = z.object({
+  date: z.string().datetime(),
+});
+
 module.exports = {
   createScheduleSchema,
   scheduleIdSchema,
+  changeScheduleSchema,
 };

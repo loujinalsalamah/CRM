@@ -72,6 +72,41 @@ class ScheduleService {
     return this.scheduleRepository.deleteSchedule(id);
   }
 
+  async changeSchedule(id, employeeId, data) {
+    const schedule = await this.scheduleRepository.findScheduleById(id);
+
+    if (!schedule) {
+      throw new AppError('Schedule not found', 404);
+    }
+
+    if (schedule.employeeId !== employeeId) {
+      throw new AppError('You are not authorized to update this schedule', 403);
+    }
+
+    const updatedSchedule = await this.scheduleRepository.updateSchedule(id, {
+      date: new Date(data.date),
+      rejectOn: null,
+    });
+
+    if (schedule.type === 'REQUEST') {
+      await this.notificationService.createNotification({
+        title: 'Schedule Request',
+        body: `Schedule for request in ${updatedSchedule.date}`,
+        userId: schedule.request.client.userId,
+        entityType: 'SCHEDULE',
+        entityId: schedule.id,
+      });
+    } else if (schedule.type === 'DEAL' && schedule.title === 'MEETING') {
+      await this.notificationService.createNotification({
+        title: 'Schedule Deal',
+        body: `Schedule for deal in ${updatedSchedule.date}`,
+        userId: schedule.deal.client.userId,
+        entityType: 'SCHEDULE',
+        entityId: schedule.id,
+      });
+    }
+  }
+
   async acceptSchedule(id) {
     const schedule = await this.scheduleRepository.findScheduleById(id);
 

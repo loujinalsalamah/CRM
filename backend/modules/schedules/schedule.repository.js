@@ -132,6 +132,24 @@ class ScheduleRepository {
             userId: true,
           },
         },
+        request: {
+          select: {
+            client: {
+              select: {
+                userId: true,
+              },
+            },
+          },
+        },
+        // deal: {
+        //   select: {
+        //     client: {
+        //       select: {
+        //         userId: true,
+        //       },
+        //     },
+        //   },
+        // },
       },
     });
   }
