@@ -111,6 +111,17 @@ class RequestRepository {
   updateRequest(id, data) {
     return this.prisma.request.update({ where: { id }, data });
   }
+
+  findRequestByBuildingNumber(data) {
+    return this.prisma.request.findFirst({
+      where: {
+        sellData: {
+          path: ['buildingNumber'],
+          equals: data.sellData.buildingNumber,
+        },
+      },
+    });
+  }
 }
 
 module.exports = RequestRepository;

@@ -16,6 +16,16 @@ class RequestService {
       employeeId: employee.id,
     };
 
+    const request =
+      await this.requestRepository.findRequestByBuildingNumber(data);
+
+    if (request) {
+      throw new AppError(
+        'You have already submitted a request for this property',
+        400,
+      );
+    }
+
     return this.requestRepository.createRequest(data);
   }
 

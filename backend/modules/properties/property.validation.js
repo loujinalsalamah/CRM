@@ -45,6 +45,9 @@ const createPropertySchema = z.object({
   sqft: z.number(),
   heating: StatusEnum,
   furnishing: FurnishingType,
+  buildingNumber: z.string(),
+  overAllQual: z.number().int().min(1).max(20),
+  overAllcond: z.number().int().min(1).max(20),
 
   numOfFloors: z.number().int().optional(),
   floorNumber: z.number().int().optional(),
@@ -53,7 +56,6 @@ const createPropertySchema = z.object({
   fireplace: z.boolean(),
   hasBasement: z.boolean(),
   basementArea: z.number().optional(),
-  internalGarageArea: z.number().optional(),
   primaryPhoto: z.string().url(),
   galleryPhoto: z.array(z.string().url()),
   nearbyPlaces: z.object({}).passthrough().optional(),
