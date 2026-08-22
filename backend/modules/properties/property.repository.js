@@ -39,6 +39,13 @@ class PropertyRepository {
     });
   }
 
+  updateProperty(id, data) {
+    return this.prisma.property.update({
+      where: { id },
+      data,
+    });
+  }
+
   findPropertiesBySearch(queryString, orConditions) {
     queryString.select =
       'id,referenceCode,type,listingType,simpleDescription,city,listedPrice,sqft,numOfRooms,bathrooms,primaryPhoto';

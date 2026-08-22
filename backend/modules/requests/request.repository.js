@@ -100,6 +100,8 @@ class RequestRepository {
       where: {
         propertyId,
         clientId,
+        status: 'COMPLETED',
+        type: { in: ['BUY', 'RENT'] },
       },
     });
   }

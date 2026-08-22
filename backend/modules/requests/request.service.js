@@ -40,7 +40,7 @@ class RequestService {
       throw new AppError('Property not found', 404);
     }
 
-    if (!property.status === 'AVAILABLE') {
+    if (property.status !== 'AVAILABLE') {
       throw new AppError('Property is not available', 400);
     }
 
@@ -55,6 +55,11 @@ class RequestService {
         400,
       );
     }
+
+    await this.propertyRepository.updateProperty(propertyId, {
+      status: 'NOT_AVAILABLE',
+    });
+
     return this.requestRepository.createRequest({
       ...data,
       status: 'COMPLETED',

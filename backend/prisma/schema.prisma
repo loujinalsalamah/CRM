@@ -210,6 +210,8 @@ model Employee {
   schedules                   Schedule[]
   requests                    Request[]
   employeeDealRecommendations employeeDealRecommendation[]
+  saleLeaseDeals              SaleLeaseDeal[]
+  buyRentDeals                BuyRentDeal[]
 
   @@map("employees")
 }
@@ -263,26 +265,28 @@ enum ScheduleType {
 }
 
 model Client {
-  id                     String     @id @default(uuid())
-  createdAt              DateTime   @default(now())
-  updatedAt              DateTime   @updatedAt
+  id                     String          @id @default(uuid())
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
   location               String?
   longitude              Float?
   latitude               Float?
   name                   String
-  phone                  String?    @unique
+  phone                  String?         @unique
   photo                  String?
   preferredLocation      String?
   minimalPreferredPrice  Int?
   maximumPreferredPrice  Int?
   preferredNumberOfRooms Int?
   favoritePropertyIds    String[]
-  leadId                 String?    @map("lead_id")
-  lead                   Lead?      @relation(fields: [leadId], references: [id])
-  userId                 String     @unique
-  user                   User       @relation(fields: [userId], references: [id])
+  leadId                 String?         @map("lead_id")
+  lead                   Lead?           @relation(fields: [leadId], references: [id])
+  userId                 String          @unique
+  user                   User            @relation(fields: [userId], references: [id])
   requests               Request[]
   properties             Property[]
+  saleLeaseDeals         SaleLeaseDeal[]
+  buyRentDeals           BuyRentDeal[]
 
   @@map("clients")
 }
@@ -391,6 +395,8 @@ model Property {
   propertyLeads           PropertyLead[]
   leadRecomendations      LeadRecomendation[]
   leadRecomendationCaches LeadRecomendationCache[]
+  saleLeaseDeals          SaleLeaseDeal[]
+  buyRentDeals            BuyRentDeal[]
 
   @@map("properties")
 }
@@ -458,6 +464,7 @@ enum PropertyType {
 enum Status {
   AVAILABLE
   NOT_AVAILABLE
+  OUT_OF_REACH
 }
 
 enum ListingType {
@@ -469,6 +476,67 @@ enum FurnishingType {
   FULLY_FURNISHED
   SEMI_FURNISHED
   UNFURNISHED
+}
+
+enum SaleLeaseDealType {
+  SALE
+  LEASE
+}
+
+enum SaleLeaseDealStatus {
+  NEGOTIATING
+  COMPLETED
+  FAILED
+}
+
+model SaleLeaseDeal {
+  id                 String              @id @default(uuid())
+  maxPhasedPrice     Float               @map("max_phased_price")
+  profitMargin       Float?              @map("profit_margin")
+  minListingPrice    Float               @map("min_listing_price")
+  maxListingPrice    Float               @map("max_listing_price")
+  actualListingPrice Float?              @map("actual_listing_price")
+  propertyId         String              @map("property_id")
+  property           Property            @relation(fields: [propertyId], references: [id])
+  clientId           String              @map("client_id")
+  client             Client              @relation(fields: [clientId], references: [id])
+  employeeId         String              @map("employee_id")
+  employee           Employee            @relation(fields: [employeeId], references: [id])
+  dealType           SaleLeaseDealType   @map("deal_type")
+  dealStatus         SaleLeaseDealStatus @default(NEGOTIATING) @map("deal_status")
+  rentalPeriod       Int?                @map("rental_period")
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+
+  @@map("sale_lease_deals")
+}
+
+enum BuyRentDealType {
+  BUY
+  RENT
+}
+
+enum BuyRentDealStatus {
+  FRESH
+  NEGOTIATING
+  COMPLETED
+  FAILED
+}
+
+model BuyRentDeal {
+  id         String            @id @default(uuid())
+  propertyId String            @map("property_id")
+  property   Property          @relation(fields: [propertyId], references: [id])
+  clientId   String            @map("client_id")
+  client     Client            @relation(fields: [clientId], references: [id])
+  employeeId String            @map("employee_id")
+  employee   Employee          @relation(fields: [employeeId], references: [id])
+  dealType   BuyRentDealType   @map("deal_type")
+  dealStatus BuyRentDealStatus @default(FRESH) @map("deal_status")
+  createdAt  DateTime          @default(now()) @map("created_at")
+  updatedAt  DateTime          @updatedAt @map("updated_at")
+
+  @@map("buy_rent_deals")
 }
 
 model Notification {
@@ -491,6 +559,7 @@ model Notification {
 enum entityType {
   SCHEDULE
   COMPLAINT
+  DEAL
 }
 
 model Presence {
