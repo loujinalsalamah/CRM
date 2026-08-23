@@ -353,6 +353,7 @@ model Property {
   // PRICING
   rentalPeriod            Int?                     @map("rental_period")
   listedPrice             Float?                   @map("listed_price")
+  actualPrice             Float?                   @map("actual_price")
   // AREA
   sqft                    Float
   // ROOMS
@@ -496,7 +497,8 @@ enum SaleLeaseDealStatus {
 model SaleLeaseDeal {
   id                 String              @id @default(uuid())
   maxPhasedPrice     Float               @map("max_phased_price")
-  profitMargin       Float?              @map("profit_margin")
+  profitMargin       Float               @map("profit_margin")
+  actualProfitMargin Float?              @map("actual_profit_margin")
   minListingPrice    Float               @map("min_listing_price")
   maxListingPrice    Float               @map("max_listing_price")
   actualListingPrice Float?              @map("actual_listing_price")

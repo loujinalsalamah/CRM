@@ -54,4 +54,12 @@ router.post(
   catchAsync(dealController.createBuyRentDeal),
 );
 
+router.get(
+  '/:id',
+  catchAsync(protect),
+  restrictTo('EMPLOYEE'),
+  validate({ params: dealIdSchema }),
+  catchAsync(dealController.getDealById),
+);
+
 module.exports = router;

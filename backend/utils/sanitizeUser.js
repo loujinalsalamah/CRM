@@ -47,6 +47,8 @@ module.exports = function sanitizeUser(user) {
       phone,
       productivity,
       averageResponseTime,
+      preferredPropertyType,
+      preferredLocation,
       userId,
       updatedAt,
       ...cleanEmployee

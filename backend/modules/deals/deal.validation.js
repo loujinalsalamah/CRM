@@ -14,6 +14,7 @@ const createSaleLeaseDealSchema = z.object({
   maxPhasedPrice: z.number().positive(),
   minListingPrice: z.number().positive(),
   maxListingPrice: z.number().positive(),
+  profitMargin: z.number().positive(),
   propertyId: z.string().uuid(),
   clientId: z.string().uuid(),
   employeeId: z.string().uuid(),

@@ -45,6 +45,56 @@ class DealRepository {
       },
     });
   }
+
+  async findDealByIdFromBothTables(id) {
+    const buyRentDeal = await this.prisma.buyRentDeal.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        dealType: true,
+        dealStatus: true,
+        createdAt: true,
+        propertyId: true,
+        clientId: true,
+        employeeId: true,
+        property: {
+          select: {
+            id: true,
+            listedPrice: true,
+            actualPrice: true,
+          },
+        },
+      },
+    });
+
+    if (buyRentDeal) {
+      return buyRentDeal;
+    }
+
+    const saleLeaseDeal = await this.prisma.saleLeaseDeal.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        maxPhasedPrice: true,
+        minListingPrice: true,
+        maxListingPrice: true,
+        profitMargin: true,
+        dealType: true,
+        dealStatus: true,
+        propertyId: true,
+        clientId: true,
+        employeeId: true,
+        rentalPeriod: true,
+        createdAt: true,
+      },
+    });
+
+    if (saleLeaseDeal) {
+      return saleLeaseDeal;
+    }
+
+    return null;
+  }
 }
 
 module.exports = DealRepository;

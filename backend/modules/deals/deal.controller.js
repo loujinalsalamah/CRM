@@ -3,6 +3,7 @@ class DealController {
     this.dealService = dealService;
     this.createSaleLeaseDeal = this.createSaleLeaseDeal.bind(this);
     this.createBuyRentDeal = this.createBuyRentDeal.bind(this);
+    this.getDealById = this.getDealById.bind(this);
   }
 
   async createSaleLeaseDeal(req, res, next) {
@@ -24,6 +25,18 @@ class DealController {
     res.status(201).json({
       status: 'success',
       message: 'deal created successfully',
+    });
+  }
+
+  async getDealById(req, res, next) {
+    const { id } = req.params;
+    const { user } = req;
+
+    const deal = await this.dealService.getDealById(id, user);
+
+    res.status(200).json({
+      status: 'success',
+      data: deal,
     });
   }
 }
