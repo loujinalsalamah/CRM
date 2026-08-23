@@ -114,6 +114,29 @@ class DealRepository {
       });
     });
   }
+
+  changeEmployeeTransaction({
+    id,
+    newEmployeeId,
+    modelType,
+    scheduleForeignKey,
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx[modelType].update({
+        where: { id },
+        data: { employeeId: newEmployeeId },
+      });
+
+      await tx.schedule.updateMany({
+        where: {
+          [scheduleForeignKey]: id,
+        },
+        data: {
+          employeeId: newEmployeeId,
+        },
+      });
+    });
+  }
 }
 
 module.exports = DealRepository;

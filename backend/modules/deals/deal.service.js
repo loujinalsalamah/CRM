@@ -1,10 +1,16 @@
 const AppError = require('../../utils/appError');
 
 class DealService {
-  constructor(dealRepository, notificationService, propertyRepository) {
+  constructor(
+    dealRepository,
+    notificationService,
+    propertyRepository,
+    employeeRepository,
+  ) {
     this.dealRepository = dealRepository;
     this.notificationService = notificationService;
     this.propertyRepository = propertyRepository;
+    this.employeeRepository = employeeRepository;
   }
 
   async createSaleLeaseDeal(data) {
@@ -133,6 +139,39 @@ class DealService {
       deal.propertyId,
       data.propertyId,
     );
+  }
+
+  async changeEmployee(id, data) {
+    const deal = await this.dealRepository.findDealByIdFromBothTables(id);
+
+    if (!deal) {
+      throw new AppError('Deal not found', 404);
+    }
+
+    if (deal.employeeId === data.employeeId) {
+      throw new AppError('This employee is already assigned to this deal', 400);
+    }
+
+    const employee = await this.employeeRepository.findEmployeeById(
+      data.employeeId,
+    );
+
+    if (!employee) {
+      throw new AppError('The new employee was not found', 404);
+    }
+
+    const isBuyRent = deal.dealType === 'BUY' || deal.dealType === 'RENT';
+
+    const modelType = isBuyRent ? 'buyRentDeal' : 'saleLeaseDeal';
+
+    const scheduleForeignKey = isBuyRent ? 'buyRentDealId' : 'saleLeaseDealId';
+
+    await this.dealRepository.changeEmployeeTransaction({
+      id,
+      newEmployeeId: data.employeeId,
+      modelType,
+      scheduleForeignKey,
+    });
   }
 }
 

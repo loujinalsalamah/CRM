@@ -5,6 +5,7 @@ class DealController {
     this.createBuyRentDeal = this.createBuyRentDeal.bind(this);
     this.getDealById = this.getDealById.bind(this);
     this.changeProperty = this.changeProperty.bind(this);
+    this.changeEmployee = this.changeEmployee.bind(this);
   }
 
   async createSaleLeaseDeal(req, res, next) {
@@ -51,6 +52,18 @@ class DealController {
     res.status(200).json({
       status: 'success',
       message: 'Property updated for this deal successfully',
+    });
+  }
+
+  async changeEmployee(req, res, next) {
+    const { id } = req.params;
+    const data = req.body;
+
+    await this.dealService.changeEmployee(id, data);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Employee updated for this deal successfully',
     });
   }
 }
