@@ -1,7 +1,7 @@
 const { z } = require('zod');
 
 const PropertyType = z.enum(['APARTMENT', 'VILLA', 'HOUSE', 'STORE', 'HALL']);
-const ListingType = z.enum(['SALE', 'RENT']);
+const ListingType = z.enum(['SALE', 'LEASE']);
 const StatusEnum = z.enum(['AVAILABLE', 'NOT_AVAILABLE']);
 const FurnishingType = z.enum([
   'FULLY_FURNISHED',

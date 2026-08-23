@@ -9,11 +9,13 @@ const restrictTo = require('../../middlewares/restrictTo');
 const DealController = require('./deal.controller');
 const DealService = require('./deal.service');
 const DealRepository = require('./deal.repository');
+const PropertyRepository = require('../properties/property.repository');
 
 const {
   createSaleLeaseDealSchema,
   createBuyRentDealSchema,
   dealIdSchema,
+  changePropertySchema,
 } = require('./deal.validation');
 
 const NotificationService = require('../notifications/notification.service');
@@ -21,9 +23,13 @@ const NotificationRepository = require('../notifications/notification.repository
 
 const notificationRepository = new NotificationRepository(prisma);
 const notificationService = new NotificationService(notificationRepository);
-
+const propertyRepository = new PropertyRepository(prisma);
 const dealRepository = new DealRepository(prisma);
-const dealService = new DealService(dealRepository, notificationService);
+const dealService = new DealService(
+  dealRepository,
+  notificationService,
+  propertyRepository,
+);
 const dealController = new DealController(dealService);
 
 const scheduleRoutes = require('../schedules/schedule.routes');
@@ -60,6 +66,14 @@ router.get(
   restrictTo('EMPLOYEE'),
   validate({ params: dealIdSchema }),
   catchAsync(dealController.getDealById),
+);
+
+router.post(
+  '/:id/changeProperty',
+  catchAsync(protect),
+  restrictTo('PURCHASING', 'RENTAL'),
+  validate({ params: dealIdSchema, body: changePropertySchema }),
+  catchAsync(dealController.changeProperty),
 );
 
 module.exports = router;

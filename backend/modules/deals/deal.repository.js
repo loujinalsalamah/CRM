@@ -95,6 +95,25 @@ class DealRepository {
 
     return null;
   }
+
+  changePropertyTransaction(id, oldPropertyId, newPropertyId) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.property.update({
+        where: { id: newPropertyId },
+        data: { status: 'NOT_AVAILABLE' },
+      });
+
+      await tx.property.update({
+        where: { id: oldPropertyId },
+        data: { status: 'AVAILABLE' },
+      });
+
+      return await tx.buyRentDeal.update({
+        where: { id },
+        data: { propertyId: newPropertyId },
+      });
+    });
+  }
 }
 
 module.exports = DealRepository;

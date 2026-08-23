@@ -1,9 +1,10 @@
 const AppError = require('../../utils/appError');
 
 class DealService {
-  constructor(dealRepository, notificationService) {
+  constructor(dealRepository, notificationService, propertyRepository) {
     this.dealRepository = dealRepository;
     this.notificationService = notificationService;
+    this.propertyRepository = propertyRepository;
   }
 
   async createSaleLeaseDeal(data) {
@@ -73,6 +74,65 @@ class DealService {
     }
 
     return deal;
+  }
+
+  async changeProperty(id, data, user) {
+    const deal = await this.dealRepository.findDealByIdFromBothTables(id);
+
+    if (!deal) {
+      throw new AppError('Deal not found', 404);
+    }
+
+    if (deal.employeeId !== user.employee.id) {
+      throw new AppError(
+        'You are not the owner of this deal or not authorized to change the property',
+        403,
+      );
+    }
+
+    if (deal.dealType !== 'BUY' && deal.dealType !== 'RENT') {
+      throw new AppError(
+        'Property change is only allowed for BUY or RENT deals',
+        400,
+      );
+    }
+
+    if (deal.dealStatus !== 'FRESH') {
+      throw new AppError(
+        'Only fresh deals can have their property changed',
+        400,
+      );
+    }
+
+    if (deal.propertyId === data.propertyId) {
+      throw new AppError('The deal is already linked to this property', 400);
+    }
+
+    const property = await this.propertyRepository.findPropertyById(
+      data.propertyId,
+    );
+
+    if (!property) {
+      throw new AppError('Property not found', 404);
+    }
+
+    if (property.status !== 'AVAILABLE') {
+      throw new AppError('The new property is not available for deals', 400);
+    }
+
+    if (deal.dealType === 'BUY' && property.listingType === 'LEASE') {
+      throw new AppError('Cannot link a BUY deal to a LEASE property', 400);
+    }
+
+    if (deal.dealType === 'RENT' && property.listingType === 'SALE') {
+      throw new AppError('Cannot link a RENT deal to a SALE property', 400);
+    }
+
+    await this.dealRepository.changePropertyTransaction(
+      id,
+      deal.propertyId,
+      data.propertyId,
+    );
   }
 }
 

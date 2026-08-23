@@ -474,7 +474,7 @@ enum Status {
 
 enum ListingType {
   SALE
-  RENT
+  LEASE
 }
 
 enum FurnishingType {
@@ -520,7 +520,7 @@ model SaleLeaseDeal {
 
 enum BuyRentDealType {
   BUY
-  RENT
+  LEASE
 }
 
 enum BuyRentDealStatus {
@@ -561,7 +561,7 @@ model Notification {
   user             User?           @relation(fields: [userId], references: [id])
   visitorSession   VisitorSession? @relation(fields: [visitorSessionId], references: [id])
 
-  @@map("user_notifications")
+  @@map("notifications")
 }
 
 enum entityType {

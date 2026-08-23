@@ -29,8 +29,13 @@ const createBuyRentDealSchema = z.object({
   dealType: z.enum(['BUY', 'RENT']),
 });
 
+const changePropertySchema = z.object({
+  propertyId: z.string().uuid(),
+});
+
 module.exports = {
   dealIdSchema,
   createSaleLeaseDealSchema,
   createBuyRentDealSchema,
+  changePropertySchema,
 };
