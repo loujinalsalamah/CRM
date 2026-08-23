@@ -1,8 +1,14 @@
 const { z } = require('zod');
 
-const dealIdSchema = z.object({
-  dealId: z.string().uuid(),
-});
+const dealIdSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    dealId: z.string().uuid().optional(),
+  })
+  .refine((data) => data.id || data.dealId, {
+    message: 'Either id or dealId must be provided',
+    path: ['id'],
+  });
 
 const createSaleLeaseDealSchema = z.object({
   maxPhasedPrice: z.number().positive(),

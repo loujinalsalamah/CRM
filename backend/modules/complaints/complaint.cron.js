@@ -1,6 +1,7 @@
 /* eslint-disable no-lonely-if */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
+/* eslint-disable no-console */
 const cron = require('node-cron');
 
 class ComplaintCron {
@@ -11,11 +12,7 @@ class ComplaintCron {
   }
 
   initResponseCheckCron() {
-    cron.schedule('*/1 * * * *', async () => {
-      console.log(
-        '--- Background Cron Job: Checking for overdue complaint responses ---',
-      );
-
+    cron.schedule('* * * * *', async () => {
       try {
         const complaints =
           await this.complaintRepository.findPendingUnrepliedComplaints();
@@ -26,11 +23,11 @@ class ComplaintCron {
           const createdAt = new Date(complaint.createdAt);
           const complaintId = complaint.id;
 
-          const timeTakenInMinutes = Math.round(
+          const timeTakenInMinutes = Math.floor(
             (now - createdAt) / (1000 * 60),
           );
 
-          if (timeTakenInMinutes > complaint.complaintType.maxResponseTime) {
+          if (timeTakenInMinutes >= complaint.complaintType.maxResponseTime) {
             const generalManager =
               await this.employeeRepository.findByRole('GENERAL_MANAGER');
 
@@ -57,7 +54,11 @@ class ComplaintCron {
                 `First alert sent to GM for complaint ${complaintId}`,
               );
             } else {
-              if (timeTakenInMinutes % 7 === 0) {
+              if (
+                (timeTakenInMinutes - complaint.complaintType.maxResponseTime) %
+                  7 ===
+                0
+              ) {
                 await this.notificationService.createNotification({
                   title: 'CRITICAL ESCALATION: Complaint Still Ignored',
                   body: `Urgent Alert! Complaint ${complaintId} has been overdue for ${timeTakenInMinutes} minutes and still has no reply.`,
@@ -80,29 +81,25 @@ class ComplaintCron {
   }
 
   initResolutionCheckCron() {
-    cron.schedule('*/2 * * * *', async () => {
-      console.log(
-        '--- Background Cron Job: Checking for overdue complaint resolutions ---',
-      );
-
+    cron.schedule('* * * * *', async () => {
       try {
         const complaints =
           await this.complaintRepository.findPendingComplaintsForResolutionCheck();
 
         const now = new Date();
 
+        const generalManager =
+          await this.employeeRepository.findByRole('GENERAL_MANAGER');
+
         for (const complaint of complaints) {
           const createdAt = new Date(complaint.createdAt);
           const complaintId = complaint.id;
 
-          const timeTakenInMinutes = Math.round(
+          const timeTakenInMinutes = Math.floor(
             (now - createdAt) / (1000 * 60),
           );
 
-          if (timeTakenInMinutes > complaint.complaintType.maxResolutionTime) {
-            const generalManager =
-              await this.employeeRepository.findByRole('GENERAL_MANAGER');
-
+          if (timeTakenInMinutes >= complaint.complaintType.maxResolutionTime) {
             if (!generalManager) {
               console.error('General Manager not found in the system');
               // eslint-disable-next-line no-continue
@@ -126,7 +123,12 @@ class ComplaintCron {
                 `First resolution timeout alert sent to GM for complaint ${complaintId}`,
               );
             } else {
-              if (timeTakenInMinutes % 7 === 0) {
+              if (
+                (timeTakenInMinutes -
+                  complaint.complaintType.maxResolutionTime) %
+                  7 ===
+                0
+              ) {
                 await this.notificationService.createNotification({
                   title: 'URGENT UNRESOLVED COMPLAINT',
                   body: `Complaint ${complaintId} remains UNRESOLVED for ${timeTakenInMinutes} minutes after creation.`,

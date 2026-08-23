@@ -15,6 +15,8 @@ const employeeRoutes = require('./modules/employees/employee.routes');
 const clientRoutes = require('./modules/clients/client.routes');
 const complaintRoutes = require('./modules/complaints/complaint.routes');
 const dealRoutes = require('./modules/deals/deal.routes');
+const visitorRoutes = require('./modules/visitors/visitor.routes');
+const leadRoutes = require('./modules/leads/lead.routes');
 
 const app = express();
 
@@ -37,6 +39,8 @@ app.use('/api/v1/employees', employeeRoutes);
 app.use('/api/v1/clients', clientRoutes);
 app.use('/api/v1/complaints', complaintRoutes);
 app.use('/api/v1/deals', dealRoutes);
+app.use('/api/v1/visitors', visitorRoutes);
+app.use('/api/v1/leads', leadRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({

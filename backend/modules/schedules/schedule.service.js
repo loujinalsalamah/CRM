@@ -25,11 +25,14 @@ class ScheduleService {
         entityType: 'SCHEDULE',
         entityId: schedule.id,
       });
-    } else if (schedule.type === 'DEAL' && schedule.title === 'MEETING') {
+    } else if (
+      schedule.type === 'BUY_RENT_DEAL' &&
+      schedule.title === 'MEETING'
+    ) {
       await this.notificationService.createNotification({
         title: 'Schedule Deal',
         body: `Schedule for deal in ${schedule.date}`,
-        userId: schedule.deal.client.userId,
+        userId: schedule.buyRentDeal.client.userId,
         entityType: 'SCHEDULE',
         entityId: schedule.id,
       });
@@ -43,12 +46,12 @@ class ScheduleService {
     );
   }
 
-  // async getDealSchedules(dealId, queryString) {
-  //   return await this.scheduleRepository.findAllDealSchedules(
-  //     dealId,
-  //     queryString,
-  //   );
-  // }
+  async getDealSchedules(dealId, queryString) {
+    return await this.scheduleRepository.findAllDealSchedules(
+      dealId,
+      queryString,
+    );
+  }
 
   async getRequestSchedules(requestId) {
     return await this.scheduleRepository.findAllRequestSchedules(requestId);
@@ -96,11 +99,14 @@ class ScheduleService {
         entityType: 'SCHEDULE',
         entityId: schedule.id,
       });
-    } else if (schedule.type === 'DEAL' && schedule.title === 'MEETING') {
+    } else if (
+      schedule.type === 'BUY_RENT_DEAL' &&
+      schedule.title === 'MEETING'
+    ) {
       await this.notificationService.createNotification({
         title: 'Schedule Deal',
         body: `Schedule for deal in ${updatedSchedule.date}`,
-        userId: schedule.deal.client.userId,
+        userId: schedule.buyRentDeal.client.userId,
         entityType: 'SCHEDULE',
         entityId: schedule.id,
       });
@@ -114,9 +120,14 @@ class ScheduleService {
       throw new AppError('Schedule not found', 404);
     }
 
-    if (schedule.type !== 'REQUEST' && schedule.type !== 'DEAL') {
+    const isRequest =
+      schedule.type === 'REQUEST' && schedule.title === 'MEETING';
+    const isBuyRentDeal =
+      schedule.type === 'BUY_RENT_DEAL' && schedule.title === 'MEETING';
+
+    if (!isRequest && !isBuyRentDeal) {
       throw new AppError(
-        'Only request and deal schedules can be accepted',
+        'Only request and buy/rent deal meeting schedules can be rejected',
         400,
       );
     }
@@ -142,7 +153,7 @@ class ScheduleService {
         entityId: schedule.id,
       });
     } else if (
-      updatedSchedule.type === 'DEAL' &&
+      updatedSchedule.type === 'BUY_RENT_DEAL' &&
       updatedSchedule.title === 'MEETING'
     ) {
       await this.notificationService.createNotification({
@@ -162,9 +173,14 @@ class ScheduleService {
       throw new AppError('Schedule not found', 404);
     }
 
-    if (schedule.type !== 'REQUEST' && schedule.type !== 'DEAL') {
+    const isRequest =
+      schedule.type === 'REQUEST' && schedule.title === 'MEETING';
+    const isBuyRentDeal =
+      schedule.type === 'BUY_RENT_DEAL' && schedule.title === 'MEETING';
+
+    if (!isRequest && !isBuyRentDeal) {
       throw new AppError(
-        'Only request and deal schedules can be rejected',
+        'Only request and buy/rent deal meeting schedules can be rejected',
         400,
       );
     }
@@ -190,7 +206,7 @@ class ScheduleService {
         entityId: schedule.id,
       });
     } else if (
-      updatedSchedule.type === 'DEAL' &&
+      updatedSchedule.type === 'BUY_RENT_DEAL' &&
       updatedSchedule.title === 'MEETING'
     ) {
       await this.notificationService.createNotification({

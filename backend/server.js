@@ -11,13 +11,15 @@ const NotificationRepository = require('./modules/notifications/notification.rep
 const NotificationService = require('./modules/notifications/notification.service');
 const EmployeeRepository = require('./modules/employees/employee.repository');
 
+const ScheduleCron = require('./modules/schedules/schedule.cron');
+const ScheduleRepository = require('./modules/schedules/schedule.repository');
+
 dotenv.config({ path: './config.env' });
 
 const AIService = require('./modules/ai/ai.service');
 const aiService = new AIService();
 
 const app = require('./app');
-const notificationRepository = require('./modules/notifications/notification.repository');
 
 async function connection() {
   try {
@@ -50,6 +52,13 @@ const complaintCron = new ComplaintCron(
   new NotificationService(new NotificationRepository(prisma)),
   new EmployeeRepository(prisma),
 );
+
+const scheduleCron = new ScheduleCron(
+  new ScheduleRepository(prisma),
+  new NotificationService(new NotificationRepository(prisma)),
+);
+
+scheduleCron.initScheduleReminderCron();
 
 complaintCron.initResponseCheckCron();
 complaintCron.initResolutionCheckCron();

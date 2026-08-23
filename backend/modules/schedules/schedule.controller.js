@@ -38,21 +38,21 @@ class ScheduleController {
     });
   }
 
-  // async getDealSchedules(req, res, next) {
-  //   const dealId = req.params.dealId;
-  //   const queryString = req.query;
+  async getDealSchedules(req, res, next) {
+    const { dealId } = req.params;
+    const queryString = req.query;
 
-  //   const schedules = await this.scheduleService.getDealSchedules(
-  //     dealId,
-  //     queryString,
-  //   );
+    const schedules = await this.scheduleService.getDealSchedules(
+      dealId,
+      queryString,
+    );
 
-  //   res.status(200).json({
-  //     status: 'success',
-  //     results: schedules.length,
-  //     data: schedules,
-  //   });
-  // }
+    res.status(200).json({
+      status: 'success',
+      results: schedules.length,
+      data: schedules,
+    });
+  }
 
   async getRequestSchedules(req, res, next) {
     const { requestId } = req.params;

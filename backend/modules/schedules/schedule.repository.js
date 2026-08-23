@@ -18,9 +18,11 @@ class ScheduleRepository {
           title: true,
           description: true,
           requestId: true,
-          // dealId: true,
+          saleLeaseDealId: true,
+          buyRentDealId: true,
           request: { select: { client: { select: { userId: true } } } },
-          // deal: { select: { client: { select: { userId: true } } } },
+          saleLeaseDeal: { select: { client: { select: { userId: true } } } },
+          buyRentDeal: { select: { client: { select: { userId: true } } } },
         },
       });
 
@@ -29,42 +31,42 @@ class ScheduleRepository {
           where: { id: schedule.requestId },
           data: { status: 'IN_PROGRESS' },
         });
+      } else if (
+        schedule.type === 'BUY_RENT_DEAL' &&
+        schedule.title === 'MEETING'
+      ) {
+        await tx.buyRentDeal.update({
+          where: { id: schedule.buyRentDealId },
+          data: { dealStatus: 'NEGOTIATING' },
+        });
       }
-      // else if (schedule.type === 'DEAL' && schedule.title === 'MEETING') {
-      //   await tx.deal.update({
-      //     where: { id: schedule.dealId },
-      //     data: { status: '' },
-      //   });
-      // }
       return schedule;
     });
   }
 
-  // findAllDealSchedules(dealId, queryString) {
-  //   let features = new APIFeatures(queryString);
+  findAllDealSchedules(dealId, queryString) {
+    let features = new APIFeatures(queryString);
 
-  //   features = features.sort();
+    features = features.sort();
 
-  //   features.options.where.dealId = dealId;
+    features.options.where = {
+      OR: [{ buyRentDealId: dealId }, { saleLeaseDealId: dealId }],
+    };
 
-  //   features.options.select = {
-  //     id: true,
-  //     type: true,
-  //     date: true,
-  //     title: true,
-  //     description: true,
-  //     rejectOn: true,
-  //     acceptOn: true,
-  //     // deal: {
-  //     //   select: {
-  //     //     id: true,
-  //     //     title: true,
-  //     //   },
-  //     // },
-  //   };
+    features.options.select = {
+      id: true,
+      type: true,
+      date: true,
+      title: true,
+      description: true,
+      rejectOn: true,
+      acceptOn: true,
+      buyRentDealId: true,
+      saleLeaseDealId: true,
+    };
 
-  //   return this.prisma.schedule.findMany(features.options);
-  // }
+    return this.prisma.schedule.findMany(features.options);
+  }
 
   findAllRequestSchedules(requestId) {
     return this.prisma.schedule.findMany({
@@ -107,12 +109,16 @@ class ScheduleRepository {
           id: true,
         },
       },
-      // deal: {
-      //   select: {
-      //     id: true,
-      //     title: true,
-      //   },
-      // },
+      buyRentDeal: {
+        select: {
+          id: true,
+        },
+      },
+      saleLeaseDeal: {
+        select: {
+          id: true,
+        },
+      },
     };
 
     return this.prisma.schedule.findMany(features.options);
@@ -141,15 +147,15 @@ class ScheduleRepository {
             },
           },
         },
-        // deal: {
-        //   select: {
-        //     client: {
-        //       select: {
-        //         userId: true,
-        //       },
-        //     },
-        //   },
-        // },
+        buyRentDeal: {
+          select: {
+            client: {
+              select: {
+                userId: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -160,6 +166,33 @@ class ScheduleRepository {
 
   deleteSchedule(id) {
     return this.prisma.schedule.delete({ where: { id } });
+  }
+
+  findSchedulesForReminder(startTime, endTime) {
+    return this.prisma.schedule.findMany({
+      where: {
+        date: {
+          gte: startTime,
+          lt: endTime,
+        },
+        OR: [{ type: 'REQUEST' }, { type: 'BUY_RENT_DEAL', title: 'MEETING' }],
+        acceptOn: {
+          not: null,
+        },
+        rejectOn: null,
+      },
+      select: {
+        id: true,
+        title: true,
+        date: true,
+        type: true,
+        employee: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
   }
 }
 

@@ -27,8 +27,8 @@ model VisitorSession {
 
 model Lead {
   id                      String                   @id @default(uuid())
-  budget                  Float
-  source                  String
+  budget                  Float?
+  source                  String?
   createdAt               DateTime                 @default(now()) @map("created_at")
   updatedAt               DateTime                 @updatedAt @map("updated_at")
   visitorSessionId        String                   @unique @map("visitor_session_id")
@@ -240,27 +240,31 @@ enum EmployeeRole {
 }
 
 model Schedule {
-  id          String       @id @default(uuid())
-  type        ScheduleType
-  date        DateTime
-  title       String
-  description String?
-  rejectOn    DateTime?    @map("rejected_on")
-  acceptOn    DateTime?    @map("accept_on")
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
-  employeeId  String       @map("employee_id")
-  employee    Employee     @relation(fields: [employeeId], references: [id])
-  requestId   String?      @map("request_id")
-  request     Request?     @relation(fields: [requestId], references: [id])
+  id              String         @id @default(uuid())
+  type            ScheduleType
+  date            DateTime
+  title           String
+  description     String?
+  rejectOn        DateTime?      @map("rejected_on")
+  acceptOn        DateTime?      @map("accept_on")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  employeeId      String         @map("employee_id")
+  employee        Employee       @relation(fields: [employeeId], references: [id])
+  requestId       String?        @map("request_id")
+  request         Request?       @relation(fields: [requestId], references: [id])
+  saleLeaseDealId String?        @map("sale_lease_deal_id")
+  saleLeaseDeal   SaleLeaseDeal? @relation(fields: [saleLeaseDealId], references: [id])
+  buyRentDealId   String?        @map("buy_rent_deal_id")
+  buyRentDeal     BuyRentDeal?   @relation(fields: [buyRentDealId], references: [id])
 
-  // deal
   @@map("schedules")
 }
 
 enum ScheduleType {
   PERSONAL
-  DEAL
+  SALE_LEASE_DEAL
+  BUY_RENT_DEAL
   REQUEST
 }
 
@@ -507,6 +511,7 @@ model SaleLeaseDeal {
   rentalPeriod       Int?                @map("rental_period")
   createdAt          DateTime            @default(now()) @map("created_at")
   updatedAt          DateTime            @updatedAt @map("updated_at")
+  schedules          Schedule[]
 
   @@map("sale_lease_deals")
 }
@@ -535,6 +540,7 @@ model BuyRentDeal {
   dealStatus BuyRentDealStatus @default(FRESH) @map("deal_status")
   createdAt  DateTime          @default(now()) @map("created_at")
   updatedAt  DateTime          @updatedAt @map("updated_at")
+  schedules  Schedule[]
 
   @@map("buy_rent_deals")
 }

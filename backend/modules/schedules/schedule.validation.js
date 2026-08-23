@@ -1,7 +1,12 @@
 const { z } = require('zod');
 
 // eslint-disable-next-line no-unused-vars
-const ScheduleTypeEnum = z.enum(['PERSONAL', 'DEAL', 'REQUEST']);
+const ScheduleTypeEnum = z.enum([
+  'PERSONAL',
+  'BUY_RENT_DEAL',
+  'SALE_LEASE_DEAL',
+  'REQUEST',
+]);
 
 const personalScheduleSchema = z.object({
   type: z.literal('PERSONAL'),
@@ -10,12 +15,19 @@ const personalScheduleSchema = z.object({
   description: z.string().optional(),
 });
 
-const dealScheduleSchema = z.object({
-  type: z.literal('DEAL'),
+const saleLeaseDealScheduleSchema = z.object({
+  type: z.literal('SALE_LEASE_DEAL'),
   date: z.string().datetime(),
   title: z.string().min(3),
   description: z.string().optional(),
-  dealId: z.string().uuid(),
+  saleLeaseDealId: z.string().uuid(),
+});
+const buyRentDealScheduleSchema = z.object({
+  type: z.literal('BUY_RENT_DEAL'),
+  date: z.string().datetime(),
+  title: z.string().min(3),
+  description: z.string().optional(),
+  buyRentDealId: z.string().uuid(),
 });
 
 const requestScheduleSchema = z.object({
@@ -28,7 +40,8 @@ const requestScheduleSchema = z.object({
 
 const createScheduleSchema = z.discriminatedUnion('type', [
   personalScheduleSchema,
-  dealScheduleSchema,
+  saleLeaseDealScheduleSchema,
+  buyRentDealScheduleSchema,
   requestScheduleSchema,
 ]);
 
