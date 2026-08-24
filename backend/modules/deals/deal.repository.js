@@ -10,6 +10,20 @@ class DealRepository {
         select: {
           id: true,
           employee: { select: { userId: true } },
+          client: { select: { userId: true } },
+        },
+      });
+
+      await tx.room.create({
+        data: {
+          type: 'DEAL',
+          saleLeaseDeal: { connect: { id: deal.id } },
+          roomMembers: {
+            create: [
+              { userId: deal.employee.userId },
+              { userId: deal.client.userId },
+            ],
+          },
         },
       });
 
@@ -35,6 +49,20 @@ class DealRepository {
         select: {
           id: true,
           employee: { select: { userId: true } },
+          client: { select: { userId: true } },
+        },
+      });
+
+      await tx.room.create({
+        data: {
+          type: 'DEAL',
+          buyRentDeal: { connect: { id: deal.id } },
+          roomMembers: {
+            create: [
+              { userId: deal.employee.userId },
+              { userId: deal.client.userId },
+            ],
+          },
         },
       });
 

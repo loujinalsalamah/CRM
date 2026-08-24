@@ -5,6 +5,7 @@ const createSocketServer = require('./socket/socketServer');
 const notificationSocket = require('./socket/notificationSocket');
 const { setIo } = require('./socket/io');
 const ComplaintCron = require('./modules/complaints/complaint.cron');
+const chatSocket = require('./socket/chatSocket');
 
 const ComplaintRepository = require('./modules/complaints/complaint.repository');
 const NotificationRepository = require('./modules/notifications/notification.repository');
@@ -42,6 +43,8 @@ const io = createSocketServer(server);
 setIo(io);
 
 notificationSocket(io);
+
+chatSocket(io);
 
 server.listen(port, '0.0.0.0', () => {
   console.log(`App running on port ${port}...`);
