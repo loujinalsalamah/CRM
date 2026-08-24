@@ -23,9 +23,15 @@ const createEmployeeSchema = z.object({
   password: z.string().min(8).max(100),
 });
 
-const employeeIdSchema = z.object({
-  id: z.string().uuid(),
-});
+const employeeIdSchema = z
+  .object({
+    id: z.string().uuid().optional(),
+    employeeId: z.string().uuid().optional(),
+  })
+  .refine((data) => data.id || data.employeeId, {
+    message: 'Either id or employeeId must be provided',
+    path: ['id'],
+  });
 
 module.exports = {
   createEmployeeSchema,

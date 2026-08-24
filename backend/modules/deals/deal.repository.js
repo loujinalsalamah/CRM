@@ -4,30 +4,52 @@ class DealRepository {
   }
 
   createSaleLeaseDeal(data) {
-    return this.prisma.saleLeaseDeal.create({
-      data,
-      select: {
-        id: true,
-        employee: {
-          select: {
-            userId: true,
-          },
+    return this.prisma.$transaction(async (tx) => {
+      const deal = await tx.saleLeaseDeal.create({
+        data,
+        select: {
+          id: true,
+          employee: { select: { userId: true } },
         },
-      },
+      });
+
+      await tx.request.updateMany({
+        where: {
+          propertyId: data.propertyId,
+          status: 'COMPLETED',
+          isDealCreated: false,
+        },
+        data: {
+          isDealCreated: true,
+        },
+      });
+
+      return deal;
     });
   }
 
   createBuyRentDeal(data) {
-    return this.prisma.buyRentDeal.create({
-      data,
-      select: {
-        id: true,
-        employee: {
-          select: {
-            userId: true,
-          },
+    return this.prisma.$transaction(async (tx) => {
+      const deal = await tx.buyRentDeal.create({
+        data,
+        select: {
+          id: true,
+          employee: { select: { userId: true } },
         },
-      },
+      });
+
+      await tx.request.updateMany({
+        where: {
+          propertyId: data.propertyId,
+          status: 'COMPLETED',
+          isDealCreated: false,
+        },
+        data: {
+          isDealCreated: true,
+        },
+      });
+
+      return deal;
     });
   }
 
@@ -135,6 +157,155 @@ class DealRepository {
           employeeId: newEmployeeId,
         },
       });
+    });
+  }
+
+  completeBuyRentDealTransaction({ id, propertyId, actualPrice }) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.buyRentDeal.update({
+        where: { id },
+        data: { dealStatus: 'COMPLETED' },
+      });
+
+      await tx.property.update({
+        where: { id: propertyId },
+        data: {
+          actualPrice,
+          status: 'OUT_OF_REACH',
+        },
+      });
+    });
+  }
+
+  completeSaleLeaseDealTransaction({
+    id,
+    propertyId,
+    actualProfitMargin,
+    actualListingPrice,
+    actualPrice,
+  }) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.saleLeaseDeal.update({
+        where: { id },
+        data: {
+          actualProfitMargin,
+          actualListingPrice,
+          dealStatus: 'COMPLETED',
+        },
+      });
+
+      const calculatedListedPrice = actualPrice * (1 + actualListingPrice);
+
+      await tx.property.update({
+        where: { id: propertyId },
+        data: {
+          actualPrice,
+          listedPrice: calculatedListedPrice,
+          status: 'AVAILABLE',
+        },
+      });
+    });
+  }
+
+  failBuyRentDealTransaction({ id, propertyId }) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.buyRentDeal.update({
+        where: { id },
+        data: { dealStatus: 'FAILED' },
+      });
+
+      await tx.property.update({
+        where: { id: propertyId },
+        data: { status: 'AVAILABLE' },
+      });
+
+      await tx.request.updateMany({
+        where: {
+          propertyId: propertyId,
+          status: 'COMPLETED',
+        },
+        data: {
+          status: 'REJECTED',
+        },
+      });
+    });
+  }
+
+  failSaleLeaseDealTransaction({ id, propertyId }) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.saleLeaseDeal.update({
+        where: { id },
+        data: { dealStatus: 'FAILED' },
+      });
+
+      await tx.property.update({
+        where: { id: propertyId },
+        data: { status: 'OUT_OF_REACH' },
+      });
+
+      await tx.request.updateMany({
+        where: {
+          propertyId: propertyId,
+          status: 'COMPLETED',
+        },
+        data: {
+          status: 'REJECTED',
+        },
+      });
+    });
+  }
+
+  findMyBuyRentDeals(employeeId) {
+    return this.prisma.buyRentDeal.findMany({
+      where: { employeeId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        dealStatus: true,
+        createdAt: true,
+        client: {
+          select: {
+            name: true,
+            photo: true,
+          },
+        },
+        property: {
+          select: {
+            type: true,
+            fullDescription: true,
+            city: true,
+            location: true,
+            actualPrice: true,
+          },
+        },
+      },
+    });
+  }
+
+  findMySaleLeaseDeals(employeeId) {
+    return this.prisma.saleLeaseDeal.findMany({
+      where: { employeeId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        dealStatus: true,
+        createdAt: true,
+        maxPhasedPrice: true,
+        client: {
+          select: {
+            name: true,
+            photo: true,
+          },
+        },
+        property: {
+          select: {
+            type: true,
+            fullDescription: true,
+            city: true,
+            location: true,
+          },
+        },
+      },
     });
   }
 }

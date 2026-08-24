@@ -17,6 +17,7 @@ const complaintRoutes = require('./modules/complaints/complaint.routes');
 const dealRoutes = require('./modules/deals/deal.routes');
 const visitorRoutes = require('./modules/visitors/visitor.routes');
 const leadRoutes = require('./modules/leads/lead.routes');
+const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/v1/complaints', complaintRoutes);
 app.use('/api/v1/deals', dealRoutes);
 app.use('/api/v1/visitors', visitorRoutes);
 app.use('/api/v1/leads', leadRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).json({

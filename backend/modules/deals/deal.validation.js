@@ -37,10 +37,26 @@ const changePropertySchema = z.object({
   propertyId: z.string().uuid(),
 });
 
+const completeSaleLeaseDealSchema = z.object({
+  actualProfitMargin: z.number().nonnegative(),
+  actualListingPrice: z.number().positive(),
+  actualPrice: z.number().positive(),
+});
+
+const completeBuyRentDealSchema = z.object({
+  actualPrice: z.number().positive(),
+});
+
+const completeDealSchema = z.union([
+  completeSaleLeaseDealSchema,
+  completeBuyRentDealSchema,
+]);
+
 module.exports = {
   dealIdSchema,
   createSaleLeaseDealSchema,
   createBuyRentDealSchema,
   changePropertySchema,
   changeEmployeeSchema,
+  completeDealSchema,
 };

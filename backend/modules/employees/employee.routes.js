@@ -4,6 +4,7 @@ const catchAsync = require('../../utils/catchAsync');
 const validate = require('../../middlewares/validate');
 const protect = require('../../middlewares/protect');
 const restrictTo = require('../../middlewares/restrictTo');
+const dealRoutes = require('../deals/deal.routes');
 
 const {
   createEmployeeSchema,
@@ -20,6 +21,14 @@ const employeeService = new EmployeeService(employeeRepository);
 const employeeController = new EmployeeController(employeeService);
 
 const router = express.Router();
+
+router.use(
+  '/:employeeId/deals',
+  catchAsync(protect),
+  restrictTo('GENERAL_MANAGER', 'SALES_MANAGER'),
+  validate({ params: employeeIdSchema }),
+  dealRoutes,
+);
 
 router.post(
   '/',

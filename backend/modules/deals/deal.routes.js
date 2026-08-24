@@ -18,6 +18,7 @@ const {
   dealIdSchema,
   changePropertySchema,
   changeEmployeeSchema,
+  completeDealSchema,
 } = require('./deal.validation');
 
 const NotificationService = require('../notifications/notification.service');
@@ -38,14 +39,13 @@ const dealController = new DealController(dealService);
 
 const scheduleRoutes = require('../schedules/schedule.routes');
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
-router.use(
-  '/:dealId/schedules',
+router.get(
+  '/myDeals',
   catchAsync(protect),
-  restrictTo('EMPLOYEE'),
-  validate({ params: dealIdSchema }),
-  scheduleRoutes,
+  restrictTo('PURCHASING', 'RENTAL', 'SALES', 'LEASE'),
+  catchAsync(dealController.getMyDeals),
 );
 
 router.post(
@@ -62,6 +62,13 @@ router.post(
   restrictTo('SALES_MANAGER'),
   validate({ body: createBuyRentDealSchema }),
   catchAsync(dealController.createBuyRentDeal),
+);
+
+router.get(
+  '/',
+  catchAsync(protect),
+  restrictTo('GENERAL_MANAGER', 'SALES_MANAGER'),
+  catchAsync(dealController.getEmployeeDeals),
 );
 
 router.get(
@@ -86,6 +93,30 @@ router.patch(
   restrictTo('SALES_MANAGER'),
   validate({ params: dealIdSchema, body: changeEmployeeSchema }),
   catchAsync(dealController.changeEmployee),
+);
+
+router.patch(
+  '/:id/complete',
+  catchAsync(protect),
+  restrictTo('SALES', 'PURCHASING', 'RENTAL', 'LEASE'),
+  validate({ params: dealIdSchema, body: completeDealSchema }),
+  catchAsync(dealController.completeDeal),
+);
+
+router.patch(
+  '/:id/fail',
+  catchAsync(protect),
+  restrictTo('SALES', 'PURCHASING', 'RENTAL', 'LEASE'),
+  validate({ params: dealIdSchema }),
+  catchAsync(dealController.failDeal),
+);
+
+router.use(
+  '/:dealId/schedules',
+  catchAsync(protect),
+  restrictTo('EMPLOYEE'),
+  validate({ params: dealIdSchema }),
+  scheduleRoutes,
 );
 
 module.exports = router;

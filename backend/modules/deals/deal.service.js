@@ -173,6 +173,113 @@ class DealService {
       scheduleForeignKey,
     });
   }
+
+  async completeDeal(id, data, user) {
+    const deal = await this.dealRepository.findDealByIdFromBothTables(id);
+
+    if (!deal) {
+      throw new AppError('Deal not found', 404);
+    }
+
+    if (deal.employeeId !== user.employee.id) {
+      throw new AppError(
+        'You are not the owner of this deal or not authorized to complete it',
+        403,
+      );
+    }
+
+    if (deal.dealStatus === 'COMPLETED' || deal.dealStatus === 'FAILED') {
+      throw new AppError('This deal is already closed', 400);
+    }
+
+    const isBuyRent = deal.dealType === 'BUY' || deal.dealType === 'RENT';
+
+    if (isBuyRent) {
+      await this.dealRepository.completeBuyRentDealTransaction({
+        id,
+        propertyId: deal.propertyId,
+        actualPrice: data.actualPrice,
+      });
+    } else {
+      await this.dealRepository.completeSaleLeaseDealTransaction({
+        id,
+        propertyId: deal.propertyId,
+        actualProfitMargin: data.actualProfitMargin,
+        actualListingPrice: data.actualListingPrice,
+        actualPrice: data.actualPrice,
+      });
+    }
+  }
+
+  async failDeal(id, user) {
+    const deal = await this.dealRepository.findDealByIdFromBothTables(id);
+
+    if (!deal) {
+      throw new AppError('Deal not found', 404);
+    }
+
+    if (deal.employeeId !== user.employee.id) {
+      throw new AppError(
+        'You are not the owner of this deal or not authorized to fail it',
+        403,
+      );
+    }
+
+    if (deal.dealStatus === 'COMPLETED' || deal.dealStatus === 'FAILED') {
+      throw new AppError('This deal is already closed', 400);
+    }
+
+    const isBuyRent = deal.dealType === 'BUY' || deal.dealType === 'RENT';
+
+    if (isBuyRent) {
+      await this.dealRepository.failBuyRentDealTransaction({
+        id,
+        propertyId: deal.propertyId,
+      });
+    } else {
+      await this.dealRepository.failSaleLeaseDealTransaction({
+        id,
+        propertyId: deal.propertyId,
+      });
+    }
+  }
+
+  async getMyDeals(employeeId, user) {
+    if (
+      user.employee.role === 'PURCHASING' ||
+      user.employee.role === 'RENTAL'
+    ) {
+      return this.dealRepository.findMyBuyRentDeals(employeeId);
+    }
+
+    if (user.employee.role === 'SALES' || user.employee.role === 'LEASE') {
+      return this.dealRepository.findMySaleLeaseDeals(employeeId);
+    }
+
+    return [];
+  }
+
+  async getEmployeeDeals(employeeId) {
+    const targetEmployee =
+      await this.employeeRepository.findEmployeeById(employeeId);
+
+    if (!targetEmployee) {
+      throw new AppError('The requested employee was not found', 404);
+    }
+
+    if (
+      targetEmployee.role === 'PURCHASING' ||
+      targetEmployee.role === 'RENTAL'
+    ) {
+      return await this.dealRepository.findMyBuyRentDeals(employeeId);
+    }
+
+    if (targetEmployee.role === 'SALES' || targetEmployee.role === 'LEASE') {
+      return await this.dealRepository.findMySaleLeaseDeals(employeeId);
+    }
+
+    return [];
+  }
 }
 
 module.exports = DealService;

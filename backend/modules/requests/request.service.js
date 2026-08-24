@@ -31,7 +31,6 @@ class RequestService {
 
   async createBuyRequest(clientId, data) {
     data = { ...data, clientId };
-
     const { propertyId } = data;
 
     const property = await this.propertyRepository.findPropertyById(propertyId);
@@ -56,14 +55,7 @@ class RequestService {
       );
     }
 
-    await this.propertyRepository.updateProperty(propertyId, {
-      status: 'NOT_AVAILABLE',
-    });
-
-    return this.requestRepository.createRequest({
-      ...data,
-      status: 'COMPLETED',
-    });
+    return await this.requestRepository.createBuyRequestTransaction(data);
   }
 
   getAllRequests(queryString) {

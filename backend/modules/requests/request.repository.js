@@ -9,6 +9,24 @@ class RequestRepository {
     return this.prisma.request.create({ data });
   }
 
+  createBuyRequestTransaction(data) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.property.update({
+        where: { id: data.propertyId },
+        data: { status: 'NOT_AVAILABLE' },
+      });
+
+      const newRequest = await tx.request.create({
+        data: {
+          ...data,
+          status: 'COMPLETED',
+        },
+      });
+
+      return newRequest;
+    });
+  }
+
   findAllRequests(queryString) {
     let features = new APIFeatures(queryString);
 
@@ -39,6 +57,7 @@ class RequestRepository {
     features = features.paginate();
 
     features.options.where.status = 'COMPLETED';
+    features.options.where.isDealCreated = false;
     features.options.select = select;
     return this.prisma.request.findMany(features.options);
   }
