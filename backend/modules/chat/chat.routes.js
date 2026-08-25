@@ -39,6 +39,7 @@ router.get(
 router.get(
   '/myDeals',
   catchAsync(protect),
+  restrictTo('EMPLOYEE', 'CLIENT'),
   catchAsync(chatController.getMyDealChats),
 );
 
@@ -46,6 +47,7 @@ router.get(
 router.post(
   '/',
   catchAsync(protect),
+  restrictTo('EMPLOYEE'),
   validate({ body: createRoomSchema }),
   catchAsync(chatController.createChat),
 );
@@ -54,6 +56,7 @@ router.post(
 router.get(
   '/:id/messages',
   catchAsync(protect),
+  restrictTo('EMPLOYEE', 'CLIENT'),
   validate({ params: roomIdSchema }),
   catchAsync(chatController.getChatMessages),
 );
@@ -62,6 +65,7 @@ router.get(
 router.post(
   '/:id/messages',
   catchAsync(protect),
+  restrictTo('EMPLOYEE', 'CLIENT'),
   validate({ params: roomIdSchema, body: sendMessageSchema }),
   catchAsync(chatController.sendMessage),
 );
@@ -69,6 +73,7 @@ router.post(
 router.patch(
   '/messages/:messageId',
   catchAsync(protect),
+  restrictTo('EMPLOYEE', 'CLIENT'),
   validate({ params: messageIdSchema, body: editMessageSchema }),
   catchAsync(chatController.updateMessage),
 );
@@ -76,6 +81,7 @@ router.patch(
 router.delete(
   '/messages/:messageId',
   catchAsync(protect),
+  restrictTo('EMPLOYEE', 'CLIENT'),
   validate({ params: messageIdSchema }),
   catchAsync(chatController.deleteMessage),
 );
@@ -83,6 +89,7 @@ router.delete(
 router.patch(
   '/:id/read',
   catchAsync(protect),
+  restrictTo('EMPLOYEE', 'CLIENT'),
   validate({ params: roomIdSchema, body: readMessageSchema }),
   catchAsync(chatController.markRoomAsRead),
 );
