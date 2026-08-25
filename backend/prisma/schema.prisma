@@ -580,8 +580,8 @@ model Notification {
   createdAt  DateTime    @default(now()) @map("created_at")
   userId     String      @map("user_id")
   entityType entityType? @map("entity_type")
-  entityId   String?     @map("entity_id")
-  user       User        @relation(fields: [userId], references: [id])
+  entityId   String      @map("entity_id")
+  user       User?       @relation(fields: [userId], references: [id])
 
   @@map("notifications")
 }
