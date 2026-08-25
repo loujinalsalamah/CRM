@@ -45,13 +45,13 @@ class ScheduleRepository {
   }
 
   findAllDealSchedules(dealId, queryString) {
-    let features = new APIFeatures(queryString);
-
-    features = features.sort();
+    const features = new APIFeatures(queryString);
 
     features.options.where = {
       OR: [{ buyRentDealId: dealId }, { saleLeaseDealId: dealId }],
     };
+
+    features.options.orderBy = [{ date: 'asc' }];
 
     features.options.select = {
       id: true,
@@ -63,6 +63,7 @@ class ScheduleRepository {
       acceptOn: true,
       buyRentDealId: true,
       saleLeaseDealId: true,
+      createdAt: true,
     };
 
     return this.prisma.schedule.findMany(features.options);

@@ -63,6 +63,28 @@ model LeadBehavior {
   @@map("lead_behaviors")
 }
 
+enum ClientEventType {
+  VIEW
+  LIKE
+  SHARE
+  ADD_TO_FAVORITE
+  REMOVE_FROM_FAVORITE
+  REQUEST
+}
+
+model ClientBehavior {
+  id         String          @id @default(uuid())
+  eventType  ClientEventType @map("event_type")
+  propertyId String          @map("property_id")
+  property   Property        @relation(fields: [propertyId], references: [id])
+  dwellTime  Int             @map("dwell_time")
+  createdAt  DateTime        @default(now()) @map("created_at")
+  clientId   String          @map("client_id")
+  client     Client          @relation(fields: [clientId], references: [id])
+
+  @@map("client_behaviors")
+}
+
 enum UrgencyLevel {
   LOW
   MEDIUM
@@ -269,28 +291,29 @@ enum ScheduleType {
 }
 
 model Client {
-  id                     String          @id @default(uuid())
-  createdAt              DateTime        @default(now())
-  updatedAt              DateTime        @updatedAt
+  id                     String           @id @default(uuid())
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
   location               String?
   longitude              Float?
   latitude               Float?
   name                   String
-  phone                  String?         @unique
+  phone                  String?          @unique
   photo                  String?
   preferredLocation      String?
   minimalPreferredPrice  Int?
   maximumPreferredPrice  Int?
   preferredNumberOfRooms Int?
   favoritePropertyIds    String[]
-  leadId                 String?         @map("lead_id")
-  lead                   Lead?           @relation(fields: [leadId], references: [id])
-  userId                 String          @unique
-  user                   User            @relation(fields: [userId], references: [id])
+  leadId                 String?          @map("lead_id")
+  lead                   Lead?            @relation(fields: [leadId], references: [id])
+  userId                 String           @unique
+  user                   User             @relation(fields: [userId], references: [id])
   requests               Request[]
   properties             Property[]
   saleLeaseDeals         SaleLeaseDeal[]
   buyRentDeals           BuyRentDeal[]
+  clientBehaviors        ClientBehavior[]
 
   @@map("clients")
 }
@@ -402,6 +425,7 @@ model Property {
   leadRecomendationCaches LeadRecomendationCache[]
   saleLeaseDeals          SaleLeaseDeal[]
   buyRentDeals            BuyRentDeal[]
+  clientBehaviors         ClientBehavior[]
 
   @@map("properties")
 }
@@ -589,23 +613,23 @@ enum PresenceStatus {
 }
 
 model Room {
-  id            String       @id @default(uuid())
-  name          String?
-  image         String?
-  description   String?
-  type          RoomCategory
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  ownerId       String?
-  owner         User?        @relation("RoomOwner", fields: [ownerId], references: [id])
-  lastMessageId String?      @unique
-  lastMessage   Message?     @relation("RoomLastMessage", fields: [lastMessageId], references: [id])
-  buyRentDealId String?      @unique
-  buyRentDeal   BuyRentDeal? @relation("BuyRentDealRoom", fields: [buyRentDealId], references: [id])
-  saleLeaseDealId String?    @unique
+  id              String         @id @default(uuid())
+  name            String?
+  image           String?
+  description     String?
+  type            RoomCategory
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  ownerId         String?
+  owner           User?          @relation("RoomOwner", fields: [ownerId], references: [id])
+  lastMessageId   String?        @unique
+  lastMessage     Message?       @relation("RoomLastMessage", fields: [lastMessageId], references: [id])
+  buyRentDealId   String?        @unique
+  buyRentDeal     BuyRentDeal?   @relation("BuyRentDealRoom", fields: [buyRentDealId], references: [id])
+  saleLeaseDealId String?        @unique
   saleLeaseDeal   SaleLeaseDeal? @relation("SaleLeaseDealRoom", fields: [saleLeaseDealId], references: [id])
-  roomMembers   RoomMember[]
-  messages      Message[]
+  roomMembers     RoomMember[]
+  messages        Message[]
 
   @@map("rooms")
 }
@@ -618,7 +642,7 @@ enum RoomCategory {
 
 model RoomMember {
   id                String   @id @default(uuid())
-  lastReadMessageId String?   @map("last_read_message_id")
+  lastReadMessageId String?  @map("last_read_message_id")
   joinedAt          DateTime @default(now()) @map("joined_at")
   roomId            String
   room              Room     @relation(fields: [roomId], references: [id])
