@@ -120,8 +120,7 @@ class ScheduleService {
       throw new AppError('Schedule not found', 404);
     }
 
-    const isRequest =
-      schedule.type === 'REQUEST' && schedule.title === 'MEETING';
+    const isRequest = schedule.type === 'REQUEST';
     const isBuyRentDeal =
       schedule.type === 'BUY_RENT_DEAL' && schedule.title === 'MEETING';
 
