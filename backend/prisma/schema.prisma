@@ -14,13 +14,12 @@ datasource db {
 }
 
 model VisitorSession {
-  id            String         @id @default(uuid())
-  createdAt     DateTime       @default(now()) @map("created_at")
-  lastActiveAt  DateTime       @updatedAt @map("last_active_at")
-  islead        Boolean        @default(false) @map("is_lead")
-  ip            String?
-  notifications Notification[]
-  lead          Lead?
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now()) @map("created_at")
+  lastActiveAt DateTime @updatedAt @map("last_active_at")
+  islead       Boolean  @default(false) @map("is_lead")
+  ip           String?
+  lead         Lead?
 
   @@map("visitor_sessions")
 }
@@ -47,7 +46,6 @@ enum LeadEventType {
   VIEW
   LIKE
   SHARE
-  Notification
 }
 
 model LeadBehavior {
@@ -574,18 +572,16 @@ model BuyRentDeal {
 }
 
 model Notification {
-  id               String          @id @default(uuid())
-  title            String
-  body             String
-  data             Json?
-  isRead           Boolean         @default(false) @map("is_read")
-  createdAt        DateTime        @default(now()) @map("created_at")
-  userId           String?         @map("user_id")
-  visitorSessionId String?         @map("visitor_session_id")
-  entityType       entityType?     @map("entity_type")
-  entityId         String?         @map("entity_id")
-  user             User?           @relation(fields: [userId], references: [id])
-  visitorSession   VisitorSession? @relation(fields: [visitorSessionId], references: [id])
+  id         String      @id @default(uuid())
+  title      String
+  body       String
+  data       Json?
+  isRead     Boolean     @default(false) @map("is_read")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  userId     String      @map("user_id")
+  entityType entityType? @map("entity_type")
+  entityId   String?     @map("entity_id")
+  user       User        @relation(fields: [userId], references: [id])
 
   @@map("notifications")
 }
