@@ -18,7 +18,7 @@ const router = express.Router();
 router.get(
   '/',
   catchAsync(protect),
-  restrictTo('SALES_MANAGER'),
+  restrictTo('GENERAL_MANAGER', 'SALES_MANAGER'),
   catchAsync(dashboardController.getDashboard),
 );
 
