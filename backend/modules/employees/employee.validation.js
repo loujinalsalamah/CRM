@@ -4,7 +4,7 @@ const EmployeeRoleEnum = z.enum([
   'SALES',
   'PURCHASING',
   'RENTAL',
-  'SUPPORT',
+  'LEASE',
   'CONSULTANT',
   'SALES_MANAGER',
   'GENERAL_MANAGER',
